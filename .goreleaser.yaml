@@ -122,7 +122,7 @@ changelog:
 release:
   github:
     owner: DelineaLaari
-    name: delinea-platform
+    name: delinea-netconfig
 
   # Release name template
   name_template: "delinea-netconfig {{.Version}}"
