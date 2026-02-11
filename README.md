@@ -1,6 +1,6 @@
 # Delinea Network Requirements Converter
 
-[![CI](https://github.com/DelineaXPM/delinea-platform/workflows/CI/badge.svg)](https://github.com/DelineaXPM/delinea-platform/actions)
+[![CI](https://github.com/DelineaLaari/delinea-netconfig/workflows/CI/badge.svg)](https://github.com/DelineaLaari/delinea-netconfig/actions)
 [![Go Version](https://img.shields.io/badge/Go-1.23%2B-blue.svg)](https://go.dev)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
