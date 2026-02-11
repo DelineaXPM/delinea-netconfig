@@ -203,6 +203,9 @@ dockers:
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.description=Convert Delinea network requirements to various firewall and IaC formats"
+      - "--label=org.opencontainers.image.source=https://github.com/DelineaLaari/delinea-netconfig"
+      - "--label=org.opencontainers.image.licenses=MIT"
 
   - image_templates:
       - "ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-arm64"
@@ -217,6 +220,9 @@ dockers:
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.description=Convert Delinea network requirements to various firewall and IaC formats"
+      - "--label=org.opencontainers.image.source=https://github.com/DelineaLaari/delinea-netconfig"
+      - "--label=org.opencontainers.image.licenses=MIT"
 
 # Docker manifests for multi-arch images
 docker_manifests:
