@@ -3,6 +3,7 @@ package converter
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
@@ -24,9 +25,16 @@ func (c *TerraformConverter) Convert(entries []types.NetworkEntry) ([]byte, erro
 	// Group entries by direction, service, region, and type
 	variableGroups := groupEntriesForTerraform(entries)
 
-	// Generate variables
-	for varName, varData := range variableGroups {
-		c.writeVariable(buf, varName, varData)
+	// Get sorted variable names for consistent output
+	varNames := make([]string, 0, len(variableGroups))
+	for varName := range variableGroups {
+		varNames = append(varNames, varName)
+	}
+	sort.Strings(varNames)
+
+	// Generate variables in sorted order
+	for _, varName := range varNames {
+		c.writeVariable(buf, varName, variableGroups[varName])
 	}
 
 	return buf.Bytes(), nil
@@ -88,11 +96,16 @@ func groupEntriesForTerraform(entries []types.NetworkEntry) map[string]terraform
 
 // writeVariable writes a Terraform variable to the buffer
 func (c *TerraformConverter) writeVariable(buf *bytes.Buffer, name string, data terraformVarData) {
+	// Sort values for consistent output
+	values := make([]string, len(data.Values))
+	copy(values, data.Values)
+	sort.Strings(values)
+
 	fmt.Fprintf(buf, "variable %q {\n", name)
 	fmt.Fprintf(buf, "  description = %q\n", data.Description)
 	fmt.Fprintln(buf, "  type        = list(string)")
 	fmt.Fprintln(buf, "  default = [")
-	for _, value := range data.Values {
+	for _, value := range values {
 		fmt.Fprintf(buf, "    %q,\n", value)
 	}
 	fmt.Fprintln(buf, "  ]")
