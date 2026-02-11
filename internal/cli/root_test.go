@@ -22,7 +22,7 @@ func TestLogInfo(t *testing.T) {
 		os.Stderr = old
 
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		_, _ = io.Copy(&buf, r)
 		return buf.String()
 	}
 
@@ -91,7 +91,7 @@ func TestLogVerbose(t *testing.T) {
 		os.Stderr = old
 
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		_, _ = io.Copy(&buf, r)
 		return buf.String()
 	}
 
@@ -162,7 +162,7 @@ func TestLogError(t *testing.T) {
 		os.Stderr = old
 
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		_, _ = io.Copy(&buf, r)
 		return buf.String()
 	}
 

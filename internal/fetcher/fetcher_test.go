@@ -121,7 +121,7 @@ func TestFetchFromURL(t *testing.T) {
 				assert.Contains(t, r.Header.Get("User-Agent"), "delinea-netconfig")
 
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"test": "data"}`))
+				_, _ = w.Write([]byte(`{"test": "data"}`))
 			},
 			expectErr: false,
 			checkData: func(t *testing.T, data []byte) {
@@ -132,7 +132,7 @@ func TestFetchFromURL(t *testing.T) {
 			name: "fetches empty response",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte{})
+				_, _ = w.Write([]byte{})
 			},
 			expectErr: false,
 			checkData: func(t *testing.T, data []byte) {
@@ -143,7 +143,7 @@ func TestFetchFromURL(t *testing.T) {
 			name: "handles 404 error",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusNotFound)
-				w.Write([]byte("Not Found"))
+				_, _ = w.Write([]byte("Not Found"))
 			},
 			expectErr: true,
 			checkData: nil,
@@ -152,7 +152,7 @@ func TestFetchFromURL(t *testing.T) {
 			name: "handles 500 error",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Internal Server Error"))
+				_, _ = w.Write([]byte("Internal Server Error"))
 			},
 			expectErr: true,
 			checkData: nil,
@@ -161,7 +161,7 @@ func TestFetchFromURL(t *testing.T) {
 			name: "handles 403 forbidden",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusForbidden)
-				w.Write([]byte("Forbidden"))
+				_, _ = w.Write([]byte("Forbidden"))
 			},
 			expectErr: true,
 			checkData: nil,
@@ -175,7 +175,7 @@ func TestFetchFromURL(t *testing.T) {
 				for i := range data {
 					data[i] = 'x'
 				}
-				w.Write(data)
+				_, _ = w.Write(data)
 			},
 			expectErr: false,
 			checkData: func(t *testing.T, data []byte) {
