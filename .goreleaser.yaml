@@ -62,7 +62,6 @@ builds:
 
 archives:
   - id: default
-    rlcp: true
     name_template: >-
       {{ .ProjectName }}_
       {{- .Version }}_
@@ -76,12 +75,6 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-      - goos: darwin
-        format: tar.gz
-      - goos: linux
-        format: tar.gz
-      - goos: freebsd
-        format: tar.gz
 
     # Files to include in the archive
     files:
