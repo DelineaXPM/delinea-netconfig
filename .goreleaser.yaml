@@ -194,8 +194,8 @@ brews:
 # Docker images
 dockers:
   - image_templates:
-      - "ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-amd64"
-      - "ghcr.io/delineaxpm/delinea-netconfig:latest-amd64"
+      - "ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-amd64"
+      - "ghcr.io/delinealaari/delinea-netconfig:latest-amd64"
     use: buildx
     goos: linux
     goarch: amd64
@@ -208,8 +208,8 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
 
   - image_templates:
-      - "ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-arm64"
-      - "ghcr.io/delineaxpm/delinea-netconfig:latest-arm64"
+      - "ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-arm64"
+      - "ghcr.io/delinealaari/delinea-netconfig:latest-arm64"
     use: buildx
     goos: linux
     goarch: arm64
@@ -223,15 +223,15 @@ dockers:
 
 # Docker manifests for multi-arch images
 docker_manifests:
-  - name_template: ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}
+  - name_template: ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}
     image_templates:
-      - ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-amd64
-      - ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-arm64
+      - ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-amd64
+      - ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-arm64
 
-  - name_template: ghcr.io/delineaxpm/delinea-netconfig:latest
+  - name_template: ghcr.io/delinealaari/delinea-netconfig:latest
     image_templates:
-      - ghcr.io/delineaxpm/delinea-netconfig:latest-amd64
-      - ghcr.io/delineaxpm/delinea-netconfig:latest-arm64
+      - ghcr.io/delinealaari/delinea-netconfig:latest-amd64
+      - ghcr.io/delinealaari/delinea-netconfig:latest-arm64
 
 # Announce release
 announce:
