@@ -1,0 +1,44 @@
+{
+  "Description": "Delinea Platform Network Requirements",
+  "GroupName": "delinea-platform-sg",
+  "IpPermissions": [
+    {
+      "IpProtocol": "tcp",
+      "FromPort": 443,
+      "ToPort": 443,
+      "IpRanges": [
+        {
+          "CidrIp": "13.68.202.64/29",
+          "Description": "webhooks - Webhook endpoints from \u003ctenant\u003e (us)"
+        }
+      ]
+    }
+  ],
+  "IpPermissionsEgress": [
+    {
+      "IpProtocol": "tcp",
+      "FromPort": 443,
+      "ToPort": 443,
+      "IpRanges": [
+        {
+          "CidrIp": "199.83.128.0/21",
+          "Description": "static_service - Static service without tenant placeholders (global)"
+        },
+        {
+          "CidrIp": "198.143.32.0/19",
+          "Description": "static_service - Static service without tenant placeholders (global)"
+        }
+      ]
+    }
+  ],
+  "Tags": [
+    {
+      "Key": "Name",
+      "Value": "delinea-platform-sg"
+    },
+    {
+      "Key": "ManagedBy",
+      "Value": "delinea-netconfig"
+    }
+  ]
+}

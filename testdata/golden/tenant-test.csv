@@ -1,0 +1,9 @@
+direction,service,region,type,value,protocol,ports,description,redundancy
+outbound,platform,us,hostname,<tenant>.delinea.app,tcp,443,Platform services for <tenant>,
+outbound,platform,us,hostname,portal.<tenant>.delinea.app,tcp,443,Platform services for <tenant>,
+outbound,secret_server,global,hostname,<tenant>.secretservercloud.com,tcp,443,Secret Server Cloud endpoints for <tenant>,
+outbound,secret_server,global,hostname,api.<tenant>.secretservercloud.com,tcp,443,Secret Server Cloud endpoints for <tenant>,
+outbound,secret_server,global,hostname,app.<tenant>.secretservercloud.com,tcp,443,Secret Server Cloud endpoints for <tenant>,
+outbound,static_service,global,ipv4,199.83.128.0/21,tcp,443,Static service without tenant placeholders,
+outbound,static_service,global,ipv4,198.143.32.0/19,tcp,443,Static service without tenant placeholders,
+inbound,webhooks,us,ipv4,13.68.202.64/29,tcp,443,Webhook endpoints from <tenant>,

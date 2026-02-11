@@ -1,0 +1,242 @@
+# GoReleaser configuration for delinea-netconfig
+# https://goreleaser.com
+
+version: 2
+
+project_name: delinea-netconfig
+
+before:
+  hooks:
+    # Ensure dependencies are up to date
+    - go mod tidy
+    # Run tests before building
+    - go test ./...
+
+builds:
+  - id: delinea-netconfig
+    main: ./cmd/delinea-netconfig
+    binary: delinea-netconfig
+
+    # Build for multiple platforms
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+
+    goarch:
+      - amd64
+      - arm64
+      - 386
+      - arm
+
+    # ARM variants
+    goarm:
+      - "6"
+      - "7"
+
+    # Ignore certain combinations
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: darwin
+        goarch: arm
+      - goos: windows
+        goarch: arm
+      - goos: windows
+        goarch: arm64
+      - goos: freebsd
+        goarch: arm
+      - goos: freebsd
+        goarch: arm64
+
+    # Inject version information at build time
+    ldflags:
+      - -s -w
+      - -X github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/cli.Version={{.Version}}
+      - -X github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/cli.Commit={{.Commit}}
+      - -X github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/cli.Date={{.Date}}
+
+    env:
+      - CGO_ENABLED=0
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+    # Use zip for Windows
+    format_overrides:
+      - goos: windows
+        format: zip
+
+    # Files to include in the archive
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - docs/**/*
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - 'merge conflict'
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: 'Bug Fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: 'Performance Improvements'
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: 'Documentation'
+      regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: Others
+      order: 999
+
+release:
+  github:
+    owner: DelineaXPM
+    name: delinea-platform
+
+  # Release name template
+  name_template: "delinea-netconfig {{.Version}}"
+
+  # Create draft release (requires manual publish)
+  draft: false
+
+  # Mark as prerelease if version contains -rc, -beta, -alpha
+  prerelease: auto
+
+  # Release footer
+  footer: |
+    ## Installation
+
+    ### Binary Downloads
+    Download the appropriate binary for your platform from the assets below.
+
+    ### Using Installation Script (Linux/macOS)
+    ```bash
+    curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-platform/main/delinea-netconfig/install.sh | sh
+    ```
+
+    ### Using Homebrew (macOS/Linux)
+    ```bash
+    brew install delinea/tap/delinea-netconfig
+    ```
+
+    ### Verify Installation
+    ```bash
+    delinea-netconfig version
+    ```
+
+    ---
+
+    **Full Changelog**: https://github.com/DelineaXPM/delinea-platform/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+# Homebrew tap
+brews:
+  - name: delinea-netconfig
+    repository:
+      owner: DelineaXPM
+      name: homebrew-tap
+
+    # Alternative names
+    alternative_names:
+      - netconfig
+
+    # Git author for commits
+    commit_author:
+      name: delinea-bot
+      email: bot@delinea.com
+
+    # Folder inside repository
+    directory: Formula
+
+    homepage: https://github.com/DelineaXPM/delinea-platform/tree/main/delinea-netconfig
+    description: "Convert Delinea network requirements to various firewall and IaC formats"
+    license: "MIT"
+
+    # Install instructions
+    install: |
+      bin.install "delinea-netconfig"
+
+      # Install shell completions
+      bash_completion.install "completions/delinea-netconfig.bash" => "delinea-netconfig"
+      zsh_completion.install "completions/_delinea-netconfig" => "_delinea-netconfig"
+      fish_completion.install "completions/delinea-netconfig.fish"
+
+    # Test instructions
+    test: |
+      system "#{bin}/delinea-netconfig", "version"
+
+# Docker images
+dockers:
+  - image_templates:
+      - "ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-amd64"
+      - "ghcr.io/delineaxpm/delinea-netconfig:latest-amd64"
+    use: buildx
+    goos: linux
+    goarch: amd64
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+
+  - image_templates:
+      - "ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-arm64"
+      - "ghcr.io/delineaxpm/delinea-netconfig:latest-arm64"
+    use: buildx
+    goos: linux
+    goarch: arm64
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+
+# Docker manifests for multi-arch images
+docker_manifests:
+  - name_template: ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}
+    image_templates:
+      - ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-amd64
+      - ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-arm64
+
+  - name_template: ghcr.io/delineaxpm/delinea-netconfig:latest
+    image_templates:
+      - ghcr.io/delineaxpm/delinea-netconfig:latest-amd64
+      - ghcr.io/delineaxpm/delinea-netconfig:latest-arm64
+
+# Announce release
+announce:
+  skip: '{{gt .Patch 0}}'  # Only announce major/minor releases

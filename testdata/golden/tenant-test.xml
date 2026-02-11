@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <devices>
+    <entry name="localhost.localdomain">
+      <vsys>
+        <entry name="vsys1">
+          <address>
+            <entry name="fqdn-tenant-delinea-app">
+              <fqdn>&lt;tenant&gt;.delinea.app</fqdn>
+              <description>Platform services for &lt;tenant&gt;</description>
+            </entry>
+            <entry name="fqdn-portal-tenant-delinea-app">
+              <fqdn>portal.&lt;tenant&gt;.delinea.app</fqdn>
+              <description>Platform services for &lt;tenant&gt;</description>
+            </entry>
+            <entry name="fqdn-tenant-secretservercloud-com">
+              <fqdn>&lt;tenant&gt;.secretservercloud.com</fqdn>
+              <description>Secret Server Cloud endpoints for &lt;tenant&gt;</description>
+            </entry>
+            <entry name="fqdn-api-tenant-secretservercloud-com">
+              <fqdn>api.&lt;tenant&gt;.secretservercloud.com</fqdn>
+              <description>Secret Server Cloud endpoints for &lt;tenant&gt;</description>
+            </entry>
+            <entry name="fqdn-app-tenant-secretservercloud-com">
+              <fqdn>app.&lt;tenant&gt;.secretservercloud.com</fqdn>
+              <description>Secret Server Cloud endpoints for &lt;tenant&gt;</description>
+            </entry>
+            <entry name="ip-199-83-128-0-21">
+              <ip-netmask>199.83.128.0/21</ip-netmask>
+              <description>Static service without tenant placeholders</description>
+            </entry>
+            <entry name="ip-198-143-32-0-19">
+              <ip-netmask>198.143.32.0/19</ip-netmask>
+              <description>Static service without tenant placeholders</description>
+            </entry>
+            <entry name="ip-13-68-202-64-29">
+              <ip-netmask>13.68.202.64/29</ip-netmask>
+              <description>Webhook endpoints from &lt;tenant&gt;</description>
+            </entry>
+          </address>
+          <service>
+            <entry name="svc-platform-tcp-443">
+              <protocol>
+                <tcp>
+                  <port>443</port>
+                </tcp>
+              </protocol>
+              <description>Platform services for &lt;tenant&gt;</description>
+            </entry>
+            <entry name="svc-secret_server-tcp-443">
+              <protocol>
+                <tcp>
+                  <port>443</port>
+                </tcp>
+              </protocol>
+              <description>Secret Server Cloud endpoints for &lt;tenant&gt;</description>
+            </entry>
+            <entry name="svc-static_service-tcp-443">
+              <protocol>
+                <tcp>
+                  <port>443</port>
+                </tcp>
+              </protocol>
+              <description>Static service without tenant placeholders</description>
+            </entry>
+            <entry name="svc-webhooks-tcp-443">
+              <protocol>
+                <tcp>
+                  <port>443</port>
+                </tcp>
+              </protocol>
+              <description>Webhook endpoints from &lt;tenant&gt;</description>
+            </entry>
+          </service>
+          <rulebase>
+            <security>
+              <rules>
+                <entry name="rule-1-platform-outbound">
+                  <from>
+                    <member>trust</member>
+                  </from>
+                  <to>
+                    <member>untrust</member>
+                  </to>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>fqdn-tenant-delinea-app</member>
+                  </destination>
+                  <service>
+                    <member>svc-platform-tcp-443</member>
+                  </service>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <action>allow</action>
+                  <description>platform - Platform services for &lt;tenant&gt;</description>
+                </entry>
+                <entry name="rule-2-platform-outbound">
+                  <from>
+                    <member>trust</member>
+                  </from>
+                  <to>
+                    <member>untrust</member>
+                  </to>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>fqdn-portal-tenant-delinea-app</member>
+                  </destination>
+                  <service>
+                    <member>svc-platform-tcp-443</member>
+                  </service>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <action>allow</action>
+                  <description>platform - Platform services for &lt;tenant&gt;</description>
+                </entry>
+                <entry name="rule-3-secret_server-outbound">
+                  <from>
+                    <member>trust</member>
+                  </from>
+                  <to>
+                    <member>untrust</member>
+                  </to>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>fqdn-tenant-secretservercloud-com</member>
+                  </destination>
+                  <service>
+                    <member>svc-secret_server-tcp-443</member>
+                  </service>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <action>allow</action>
+                  <description>secret_server - Secret Server Cloud endpoints for &lt;tenant&gt;</description>
+                </entry>
+                <entry name="rule-4-secret_server-outbound">
+                  <from>
+                    <member>trust</member>
+                  </from>
+                  <to>
+                    <member>untrust</member>
+                  </to>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>fqdn-api-tenant-secretservercloud-com</member>
+                  </destination>
+                  <service>
+                    <member>svc-secret_server-tcp-443</member>
+                  </service>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <action>allow</action>
+                  <description>secret_server - Secret Server Cloud endpoints for &lt;tenant&gt;</description>
+                </entry>
+                <entry name="rule-5-secret_server-outbound">
+                  <from>
+                    <member>trust</member>
+                  </from>
+                  <to>
+                    <member>untrust</member>
+                  </to>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>fqdn-app-tenant-secretservercloud-com</member>
+                  </destination>
+                  <service>
+                    <member>svc-secret_server-tcp-443</member>
+                  </service>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <action>allow</action>
+                  <description>secret_server - Secret Server Cloud endpoints for &lt;tenant&gt;</description>
+                </entry>
+                <entry name="rule-6-static_service-outbound">
+                  <from>
+                    <member>trust</member>
+                  </from>
+                  <to>
+                    <member>untrust</member>
+                  </to>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>ip-199-83-128-0-21</member>
+                  </destination>
+                  <service>
+                    <member>svc-static_service-tcp-443</member>
+                  </service>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <action>allow</action>
+                  <description>static_service - Static service without tenant placeholders</description>
+                </entry>
+                <entry name="rule-7-static_service-outbound">
+                  <from>
+                    <member>trust</member>
+                  </from>
+                  <to>
+                    <member>untrust</member>
+                  </to>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>ip-198-143-32-0-19</member>
+                  </destination>
+                  <service>
+                    <member>svc-static_service-tcp-443</member>
+                  </service>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <action>allow</action>
+                  <description>static_service - Static service without tenant placeholders</description>
+                </entry>
+                <entry name="rule-8-webhooks-inbound">
+                  <from>
+                    <member>untrust</member>
+                  </from>
+                  <to>
+                    <member>trust</member>
+                  </to>
+                  <source>
+                    <member>ip-13-68-202-64-29</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <service>
+                    <member>svc-webhooks-tcp-443</member>
+                  </service>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <action>allow</action>
+                  <description>webhooks - Webhook endpoints from &lt;tenant&gt;</description>
+                </entry>
+              </rules>
+            </security>
+          </rulebase>
+        </entry>
+      </vsys>
+    </entry>
+  </devices>
+</config>

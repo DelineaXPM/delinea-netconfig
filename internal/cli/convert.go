@@ -1,0 +1,201 @@
+package cli
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/converter"
+	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/fetcher"
+	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/parser"
+	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
+	"github.com/spf13/cobra"
+)
+
+var (
+	// Convert command flags
+	inputFile  string
+	inputURL   string
+	outputFile string
+	outputDir  string
+	format     string
+	tenantName string
+)
+
+var convertCmd = &cobra.Command{
+	Use:   "convert",
+	Short: "Convert network requirements to different formats",
+	Long: `Convert Delinea network requirements JSON to various firewall
+and infrastructure-as-code formats.
+
+Examples:
+  # Convert to Terraform
+  delinea-netconfig convert -f network-requirements.json --format terraform
+
+  # Convert with tenant substitution
+  delinea-netconfig convert -f network-requirements.json --format csv --tenant mycompany
+
+  # Convert to multiple formats
+  delinea-netconfig convert -f network-requirements.json --format csv,yaml,terraform
+
+  # Fetch from URL and convert
+  delinea-netconfig convert -u https://example.com/network-requirements.json --format csv
+
+  # Save to file
+  delinea-netconfig convert -f network-requirements.json --format terraform -o output.tf
+
+  # Save multiple formats to directory
+  delinea-netconfig convert -f network-requirements.json --format csv,yaml,terraform --output-dir ./configs`,
+	RunE: runConvert,
+}
+
+func init() {
+	convertCmd.Flags().StringVarP(&inputFile, "file", "f", "", "path to network-requirements.json file")
+	convertCmd.Flags().StringVarP(&inputURL, "url", "u", "", "URL to fetch network-requirements.json")
+	convertCmd.Flags().StringVarP(&outputFile, "output", "o", "", "output file path (default: stdout)")
+	convertCmd.Flags().StringVar(&outputDir, "output-dir", "", "output directory for multiple formats")
+	convertCmd.Flags().StringVar(&format, "format", "csv", "output format(s): csv, yaml, terraform, ansible, aws-sg, cisco, panos (comma-separated)")
+	convertCmd.Flags().StringVarP(&tenantName, "tenant", "t", "", "substitute <tenant> placeholder with this value")
+
+	// Mark file or url as required (at least one)
+	convertCmd.MarkFlagsOneRequired("file", "url")
+	convertCmd.MarkFlagsMutuallyExclusive("file", "url")
+	convertCmd.MarkFlagsMutuallyExclusive("output", "output-dir")
+}
+
+func runConvert(cmd *cobra.Command, args []string) error {
+	logVerbose("Starting conversion process")
+
+	// Step 1: Fetch the JSON data
+	var data []byte
+	var err error
+
+	if inputFile != "" {
+		logVerbose("Reading from file: %s", inputFile)
+		data, err = fetcher.FetchFromFile(inputFile)
+		if err != nil {
+			return fmt.Errorf("failed to read file: %w", err)
+		}
+	} else if inputURL != "" {
+		logVerbose("Fetching from URL: %s", inputURL)
+		data, err = fetcher.FetchFromURL(inputURL)
+		if err != nil {
+			return fmt.Errorf("failed to fetch from URL: %w", err)
+		}
+	}
+
+	logVerbose("Successfully fetched %d bytes", len(data))
+
+	// Step 2: Parse the JSON
+	logVerbose("Parsing network requirements JSON")
+	networkReqs, err := parser.Parse(data)
+	if err != nil {
+		return fmt.Errorf("failed to parse JSON: %w", err)
+	}
+
+	logInfo("Parsed network requirements version %s (updated: %s)", networkReqs.Version, networkReqs.UpdatedAt)
+
+	// Step 3: Normalize to network entries
+	logVerbose("Normalizing network requirements to entries")
+	entries := parser.Normalize(networkReqs)
+	logInfo("Normalized %d network entries", len(entries))
+
+	// Step 3.5: Substitute tenant placeholder if provided
+	if tenantName != "" {
+		logVerbose("Substituting <tenant> with: %s", tenantName)
+		entries = substituteTenant(entries, tenantName)
+	}
+
+	// Step 4: Parse formats
+	formats := strings.Split(format, ",")
+	for i := range formats {
+		formats[i] = strings.TrimSpace(formats[i])
+	}
+
+	logVerbose("Converting to formats: %v", formats)
+
+	// Step 5: Convert to each format
+	for _, fmt := range formats {
+		if err := convertToFormat(fmt, entries); err != nil {
+			return err
+		}
+	}
+
+	logInfo("Conversion completed successfully")
+	return nil
+}
+
+func convertToFormat(formatName string, entries []types.NetworkEntry) error {
+	logVerbose("Converting to format: %s", formatName)
+
+	// Get the converter for this format
+	conv, err := converter.GetConverter(formatName)
+	if err != nil {
+		return fmt.Errorf("unsupported format %q: %w", formatName, err)
+	}
+
+	// Convert
+	output, err := conv.Convert(entries)
+	if err != nil {
+		return fmt.Errorf("conversion to %s failed: %w", formatName, err)
+	}
+
+	// Determine output destination
+	var outputPath string
+	if outputDir != "" {
+		// Multiple formats to directory
+		filename := "output." + conv.FileExtension()
+		outputPath = filepath.Join(outputDir, filename)
+
+		// Create output directory if it doesn't exist
+		if err := os.MkdirAll(outputDir, 0755); err != nil {
+			return fmt.Errorf("failed to create output directory: %w", err)
+		}
+
+		// Write to file
+		if err := os.WriteFile(outputPath, output, 0644); err != nil {
+			return fmt.Errorf("failed to write to file %s: %w", outputPath, err)
+		}
+		logInfo("Wrote %s output to: %s", formatName, outputPath)
+	} else if outputFile != "" {
+		// Single format to specific file
+		if len(strings.Split(format, ",")) > 1 {
+			return fmt.Errorf("cannot use --output with multiple formats; use --output-dir instead")
+		}
+
+		if err := os.WriteFile(outputFile, output, 0644); err != nil {
+			return fmt.Errorf("failed to write to file %s: %w", outputFile, err)
+		}
+		logInfo("Wrote output to: %s", outputFile)
+	} else {
+		// Output to stdout
+		fmt.Print(string(output))
+	}
+
+	return nil
+}
+
+// substituteTenant replaces <tenant> placeholders in all network entry values and descriptions
+func substituteTenant(entries []types.NetworkEntry, tenant string) []types.NetworkEntry {
+	result := make([]types.NetworkEntry, len(entries))
+
+	for i, entry := range entries {
+		// Copy the entry
+		result[i] = entry
+
+		// Substitute in values
+		if len(entry.Values) > 0 {
+			newValues := make([]string, len(entry.Values))
+			for j, value := range entry.Values {
+				newValues[j] = strings.ReplaceAll(value, "<tenant>", tenant)
+			}
+			result[i].Values = newValues
+		}
+
+		// Substitute in description (for URLs and instructions)
+		result[i].Description = strings.ReplaceAll(entry.Description, "<tenant>", tenant)
+	}
+
+	return result
+}

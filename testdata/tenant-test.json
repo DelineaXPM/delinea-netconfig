@@ -1,0 +1,62 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2025-02-10T00:00:00Z",
+  "description": "Test data for tenant substitution",
+  "outbound": {
+    "secret_server": {
+      "description": "Secret Server Cloud endpoints for <tenant>",
+      "tcp_ports": [443],
+      "regions": {
+        "global": {
+          "domain": "<tenant>.secretservercloud.com",
+          "hostnames": [
+            "<tenant>.secretservercloud.com",
+            "api.<tenant>.secretservercloud.com",
+            "app.<tenant>.secretservercloud.com"
+          ]
+        }
+      }
+    },
+    "platform": {
+      "description": "Platform services for <tenant>",
+      "tcp_ports": [443],
+      "regions": {
+        "us": {
+          "hostnames": [
+            "<tenant>.delinea.app",
+            "portal.<tenant>.delinea.app"
+          ]
+        }
+      }
+    },
+    "static_service": {
+      "description": "Static service without tenant placeholders",
+      "tcp_ports": [443],
+      "regions": {
+        "global": {
+          "ipv4": [
+            "199.83.128.0/21",
+            "198.143.32.0/19"
+          ]
+        }
+      }
+    }
+  },
+  "inbound": {
+    "webhooks": {
+      "description": "Webhook endpoints from <tenant>",
+      "tcp_ports": [443],
+      "regions": {
+        "us": {
+          "ipv4": [
+            "13.68.202.64/29"
+          ]
+        }
+      }
+    }
+  },
+  "region_codes": {
+    "us": "United States",
+    "global": "Global"
+  }
+}

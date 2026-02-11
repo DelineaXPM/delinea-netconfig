@@ -1,0 +1,43 @@
+delinea_network_requirements:
+    inbound:
+        webhooks:
+            us:
+                - description: Webhook endpoints from <tenant>
+                  ports:
+                    - 443
+                  protocol: tcp
+                  type: ipv4
+                  values:
+                    - 13.68.202.64/29
+    outbound:
+        platform:
+            us:
+                - description: Platform services for <tenant>
+                  ports:
+                    - 443
+                  protocol: tcp
+                  type: hostname
+                  values:
+                    - <tenant>.delinea.app
+                    - portal.<tenant>.delinea.app
+        secret_server:
+            global:
+                - description: Secret Server Cloud endpoints for <tenant>
+                  ports:
+                    - 443
+                  protocol: tcp
+                  type: hostname
+                  values:
+                    - <tenant>.secretservercloud.com
+                    - api.<tenant>.secretservercloud.com
+                    - app.<tenant>.secretservercloud.com
+        static_service:
+            global:
+                - description: Static service without tenant placeholders
+                  ports:
+                    - 443
+                  protocol: tcp
+                  type: ipv4
+                  values:
+                    - 199.83.128.0/21
+                    - 198.143.32.0/19
