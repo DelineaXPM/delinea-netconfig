@@ -159,38 +159,38 @@ release:
 
     **Full Changelog**: https://github.com/DelineaLaari/delinea-netconfig/compare/{{ .PreviousTag }}...{{ .Tag }}
 
-# Homebrew tap
-brews:
-  - name: delinea-netconfig
-    repository:
-      owner: DelineaLaari
-      name: homebrew-tap
-
-    # Git author for commits
-    commit_author:
-      name: delinea-bot
-      email: bot@delinea.com
-
-    # Folder inside repository
-    directory: Formula
-
-    homepage: https://github.com/DelineaLaari/delinea-netconfig/tree/main/delinea-netconfig
-    description: "Convert Delinea network requirements to various firewall and IaC formats"
-    license: "MIT"
-
-    # Install instructions
-    install: |
-      bin.install "delinea-netconfig"
-
-      # Install shell completions
-      bash_completion.install "completions/delinea-netconfig.bash" => "delinea-netconfig"
-      zsh_completion.install "completions/_delinea-netconfig" => "_delinea-netconfig"
-      fish_completion.install "completions/delinea-netconfig.fish"
-
-    # Test instructions
-    test: |
-      system "#{bin}/delinea-netconfig", "version"
-
+# Homebrew tap (disabled - create homebrew-tap repository to enable)
+# # brews:
+#   - name: delinea-netconfig
+#     repository:
+#       owner: DelineaLaari
+#       name: homebrew-tap
+# 
+#     # Git author for commits
+#     commit_author:
+#       name: delinea-bot
+#       email: bot@delinea.com
+# 
+#     # Folder inside repository
+#     directory: Formula
+# 
+#     homepage: https://github.com/DelineaLaari/delinea-netconfig/tree/main/delinea-netconfig
+#     description: "Convert Delinea network requirements to various firewall and IaC formats"
+#     license: "MIT"
+# 
+#     # Install instructions
+#     install: |
+#       bin.install "delinea-netconfig"
+# 
+#       # Install shell completions
+#       bash_completion.install "completions/delinea-netconfig.bash" => "delinea-netconfig"
+#       zsh_completion.install "completions/_delinea-netconfig" => "_delinea-netconfig"
+#       fish_completion.install "completions/delinea-netconfig.fish"
+# 
+#     # Test instructions
+#     test: |
+#       system "#{bin}/delinea-netconfig", "version"
+# 
 # Docker images
 dockers:
   - image_templates:
