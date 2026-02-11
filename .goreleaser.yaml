@@ -53,9 +53,9 @@ builds:
     # Inject version information at build time
     ldflags:
       - -s -w
-      - -X github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/cli.Version={{.Version}}
-      - -X github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/cli.Commit={{.Commit}}
-      - -X github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/cli.Date={{.Date}}
+      - -X github.com/DelineaLaari/delinea-netconfig/internal/cli.Version={{.Version}}
+      - -X github.com/DelineaLaari/delinea-netconfig/internal/cli.Commit={{.Commit}}
+      - -X github.com/DelineaLaari/delinea-netconfig/internal/cli.Date={{.Date}}
 
     env:
       - CGO_ENABLED=0
@@ -121,7 +121,7 @@ changelog:
 
 release:
   github:
-    owner: DelineaXPM
+    owner: DelineaLaari
     name: delinea-platform
 
   # Release name template
@@ -142,7 +142,7 @@ release:
 
     ### Using Installation Script (Linux/macOS)
     ```bash
-    curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-platform/main/delinea-netconfig/install.sh | sh
+    curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/delinea-netconfig/install.sh | sh
     ```
 
     ### Using Homebrew (macOS/Linux)
@@ -157,13 +157,13 @@ release:
 
     ---
 
-    **Full Changelog**: https://github.com/DelineaXPM/delinea-platform/compare/{{ .PreviousTag }}...{{ .Tag }}
+    **Full Changelog**: https://github.com/DelineaLaari/delinea-netconfig/compare/{{ .PreviousTag }}...{{ .Tag }}
 
 # Homebrew tap
 brews:
   - name: delinea-netconfig
     repository:
-      owner: DelineaXPM
+      owner: DelineaLaari
       name: homebrew-tap
 
     # Git author for commits
@@ -174,7 +174,7 @@ brews:
     # Folder inside repository
     directory: Formula
 
-    homepage: https://github.com/DelineaXPM/delinea-platform/tree/main/delinea-netconfig
+    homepage: https://github.com/DelineaLaari/delinea-netconfig/tree/main/delinea-netconfig
     description: "Convert Delinea network requirements to various firewall and IaC formats"
     license: "MIT"
 
