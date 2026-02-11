@@ -139,14 +139,12 @@ release:
     ### Binary Downloads
     Download the appropriate binary for your platform from the assets below.
 
-    ### Using Installation Script (Linux/macOS)
+    ### Using Docker
     ```bash
-    curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/delinea-netconfig/install.sh | sh
-    ```
+    docker pull ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}
 
-    ### Using Homebrew (macOS/Linux)
-    ```bash
-    brew install delinea/tap/delinea-netconfig
+    # Run with local files
+    docker run --rm -v "$(pwd):/data" ghcr.io/delinealaari/delinea-netconfig:{{ .Version }} convert -f /data/network-requirements.json --format csv
     ```
 
     ### Verify Installation
