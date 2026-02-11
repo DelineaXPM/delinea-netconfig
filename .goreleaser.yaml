@@ -136,6 +136,11 @@ release:
   footer: |
     ## Installation
 
+    ### Using Installation Script (Linux/macOS)
+    ```bash
+    curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/install.sh | sh
+    ```
+
     ### Binary Downloads
     Download the appropriate binary for your platform from the assets below.
 
