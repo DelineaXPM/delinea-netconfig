@@ -166,10 +166,6 @@ brews:
       owner: DelineaXPM
       name: homebrew-tap
 
-    # Alternative names
-    alternative_names:
-      - netconfig
-
     # Git author for commits
     commit_author:
       name: delinea-bot
