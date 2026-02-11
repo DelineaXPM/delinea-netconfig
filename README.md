@@ -20,17 +20,17 @@ A CLI tool that converts Delinea's Platform IP/CIDR network requirements JSON in
 
 ## 📦 Installation
 
-### Pre-built Binaries (Recommended) ✨ NEW
+### Pre-built Binaries (Recommended) ✨
 
-Download the latest release for your platform from [GitHub Releases](https://github.com/DelineaXPM/delinea-platform/releases).
+Download the latest release for your platform from [GitHub Releases](https://github.com/DelineaLaari/delinea-netconfig/releases).
 
 **Quick install (Linux/macOS):**
 ```bash
-curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-platform/main/delinea-netconfig/install.sh | sh
+curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/install.sh | sh
 ```
 
 **Manual download:**
-1. Visit [Releases](https://github.com/DelineaXPM/delinea-platform/releases)
+1. Visit [Releases](https://github.com/DelineaLaari/delinea-netconfig/releases)
 2. Download the appropriate archive for your OS/architecture
 3. Extract and move to your PATH:
 ```bash
@@ -39,42 +39,29 @@ tar -xzf delinea-netconfig_*_Linux_x86_64.tar.gz
 sudo mv delinea-netconfig /usr/local/bin/
 ```
 
-### Homebrew (macOS/Linux) ✨ NEW
-
-```bash
-# Add Delinea tap
-brew tap delinea/tap
-
-# Install
-brew install delinea-netconfig
-
-# Update
-brew upgrade delinea-netconfig
-```
-
-### Docker ✨ NEW
+### Docker ✨
 
 ```bash
 # Pull the image
-docker pull ghcr.io/delineaxpm/delinea-netconfig:latest
+docker pull ghcr.io/delinealaari/delinea-netconfig:latest
 
-# Run
-docker run --rm -v $(pwd):/data ghcr.io/delineaxpm/delinea-netconfig:latest \
+# Run with local files
+docker run --rm -v $(pwd):/data ghcr.io/delinealaari/delinea-netconfig:latest \
   convert -f /data/network-requirements.json --format csv
 ```
 
 ### Using Go Install
 
 ```bash
-go install github.com/DelineaXPM/delinea-platform/delinea-netconfig/cmd/delinea-netconfig@latest
+go install github.com/DelineaLaari/delinea-netconfig/cmd/delinea-netconfig@latest
 ```
 
 ### From Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/DelineaXPM/delinea-platform.git
-cd delinea-platform/delinea-netconfig
+git clone https://github.com/DelineaLaari/delinea-netconfig.git
+cd delinea-netconfig
 
 # Build
 make build
@@ -679,7 +666,9 @@ jobs:
           go-version: '1.23'
 
       - name: Install delinea-netconfig
-        run: go install github.com/DelineaXPM/delinea-platform/delinea-netconfig/cmd/delinea-netconfig@latest
+        run: |
+          curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/install.sh | sh
+          echo "/usr/local/bin" >> $GITHUB_PATH
 
       - name: Fetch and convert
         run: |
@@ -738,13 +727,6 @@ See [`.github/workflows/ci.yml`](.github/workflows/ci.yml) for details.
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
-
-## 💬 Support
-
-For issues and questions:
-- **GitHub Issues**: https://github.com/DelineaXPM/delinea-platform/issues
-- **Documentation**: https://docs.delinea.com
-- **Discussions**: https://github.com/DelineaXPM/delinea-platform/discussions
 
 ## 🙏 Acknowledgments
 
