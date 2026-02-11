@@ -321,6 +321,14 @@ type NetworkEntry struct {
 - Follow OWASP top 10 guidelines
 - If you notice insecure code, fix it immediately
 
+### Changelog
+
+- **ALWAYS update CHANGELOG.md when making any meaningful change** (features, fixes, refactors, config changes)
+- Follow [Keep a Changelog](https://keepachangelog.com/) format with Added/Changed/Fixed/Removed sections
+- Entry goes under an `[Unreleased]` section if no release tag is being created
+- Entry goes under the version heading (e.g., `[1.0.4]`) if preparing a release
+- Keep entries concise but descriptive enough to understand the change without reading code
+
 ### Simplicity
 
 - **Avoid over-engineering**
@@ -1020,7 +1028,7 @@ Before ending a Claude Code session:
 - [ ] No lint warnings (`make lint`)
 - [ ] Documentation updated (if applicable)
   - [ ] README.md updated for user-facing changes
-  - [ ] CHANGELOG.md updated for release notes
+  - [ ] **CHANGELOG.md updated for ALL meaningful changes** (not just releases)
   - [ ] CLAUDE.md updated for dev workflow changes
 - [ ] No security vulnerabilities introduced
 - [ ] Golden files updated (if output changed intentionally)
