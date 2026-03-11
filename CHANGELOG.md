@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-03-11
+
 ### Added
 - Tests for `info --updates` and `info --latest` flags using httptest mock server
 - Tests for fetch error handling on both flags
@@ -95,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker image registry references
 - Repository name references in release config
 
+[1.1.1]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.0.5...v1.1.0
 [1.0.5]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.0.3...v1.0.4
