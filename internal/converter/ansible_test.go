@@ -6,7 +6,7 @@ import (
 	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 func TestAnsibleConverter_Convert(t *testing.T) {

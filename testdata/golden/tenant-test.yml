@@ -1,48 +1,48 @@
-_comment: Delinea Network Requirements - Ansible Variables
+_comment: "Delinea Network Requirements - Ansible Variables"
 delinea_firewall_rules:
-    outbound:
-        - name: platform_us_hostname
-          service: platform
-          region: us
-          type: hostname
-          destinations:
-            - <tenant>.delinea.app
-            - portal.<tenant>.delinea.app
-          protocol: tcp
-          ports:
-            - 443
-          description: Platform services for <tenant>
-        - name: secret_server_global_hostname
-          service: secret_server
-          region: global
-          type: hostname
-          destinations:
-            - <tenant>.secretservercloud.com
-            - api.<tenant>.secretservercloud.com
-            - app.<tenant>.secretservercloud.com
-          protocol: tcp
-          ports:
-            - 443
-          description: Secret Server Cloud endpoints for <tenant>
-        - name: static_service_global_ipv4
-          service: static_service
-          region: global
-          type: ipv4
-          destinations:
-            - 199.83.128.0/21
-            - 198.143.32.0/19
-          protocol: tcp
-          ports:
-            - 443
-          description: Static service without tenant placeholders
-    inbound:
-        - name: webhooks_us_ipv4
-          service: webhooks
-          region: us
-          type: ipv4
-          sources:
-            - 13.68.202.64/29
-          protocol: tcp
-          ports:
-            - 443
-          description: Webhook endpoints from <tenant>
+  outbound:
+  - name: platform_us_hostname
+    service: platform
+    region: us
+    type: hostname
+    destinations:
+    - <tenant>.delinea.app
+    - portal.<tenant>.delinea.app
+    protocol: tcp
+    ports:
+    - 443
+    description: Platform services for <tenant>
+  - name: secret_server_global_hostname
+    service: secret_server
+    region: global
+    type: hostname
+    destinations:
+    - <tenant>.secretservercloud.com
+    - api.<tenant>.secretservercloud.com
+    - app.<tenant>.secretservercloud.com
+    protocol: tcp
+    ports:
+    - 443
+    description: Secret Server Cloud endpoints for <tenant>
+  - name: static_service_global_ipv4
+    service: static_service
+    region: global
+    type: ipv4
+    destinations:
+    - 199.83.128.0/21
+    - 198.143.32.0/19
+    protocol: tcp
+    ports:
+    - 443
+    description: Static service without tenant placeholders
+  inbound:
+  - name: webhooks_us_ipv4
+    service: webhooks
+    region: us
+    type: ipv4
+    sources:
+    - 13.68.202.64/29
+    protocol: tcp
+    ports:
+    - 443
+    description: Webhook endpoints from <tenant>

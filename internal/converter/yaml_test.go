@@ -6,7 +6,7 @@ import (
 	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 func TestYAMLConverter_Convert(t *testing.T) {
@@ -101,9 +101,9 @@ func TestYAMLConverter_Convert(t *testing.T) {
 
 				ports := entry["ports"].([]interface{})
 				assert.Len(t, ports, 3)
-				assert.Equal(t, 443, ports[0])
-				assert.Equal(t, 8443, ports[1])
-				assert.Equal(t, 53, ports[2])
+				assert.EqualValues(t, 443, ports[0])
+				assert.EqualValues(t, 8443, ports[1])
+				assert.EqualValues(t, 53, ports[2])
 			},
 		},
 		{

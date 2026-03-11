@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 // YAMLConverter converts network entries to YAML format
