@@ -15,12 +15,13 @@ import (
 
 var (
 	// Convert command flags
-	inputFile  string
-	inputURL   string
-	outputFile string
-	outputDir  string
-	format     string
-	tenantName string
+	inputFile    string
+	inputURL     string
+	outputFile   string
+	outputDir    string
+	format       string
+	tenantName   string
+	regionFilter string
 )
 
 var convertCmd = &cobra.Command{
@@ -35,6 +36,10 @@ Examples:
 
   # Convert with tenant substitution
   delinea-netconfig convert -f network-requirements.json --format csv --tenant mycompany
+
+  # Convert for a specific region (includes global + region-specific rules)
+  delinea-netconfig convert -f network-requirements.json --format csv --region eu
+  delinea-netconfig convert -u https://setup.delinea.app/network-requirements.json --format yaml --tenant mycompany --region au
 
   # Convert to multiple formats
   delinea-netconfig convert -f network-requirements.json --format csv,yaml,terraform
@@ -57,6 +62,7 @@ func init() {
 	convertCmd.Flags().StringVar(&outputDir, "output-dir", "", "output directory for multiple formats")
 	convertCmd.Flags().StringVar(&format, "format", "csv", "output format(s): csv, yaml, terraform, ansible, aws-sg, cisco, panos (comma-separated)")
 	convertCmd.Flags().StringVarP(&tenantName, "tenant", "t", "", "substitute <tenant> placeholder with this value")
+	convertCmd.Flags().StringVarP(&regionFilter, "region", "r", "", "filter to global + region-specific rules (e.g. eu, au, us)")
 
 	// Mark file or url as required (at least one)
 	convertCmd.MarkFlagsOneRequired("file", "url")
@@ -105,6 +111,18 @@ func runConvert(cmd *cobra.Command, args []string) error {
 	if tenantName != "" {
 		logVerbose("Substituting <tenant> with: %s", tenantName)
 		entries = substituteTenant(entries, tenantName)
+	}
+
+	// Step 3.6: Filter by region if provided
+	if regionFilter != "" {
+		region := strings.ToLower(strings.TrimSpace(regionFilter))
+		if region == "global" {
+			logInfo("Note: global rules are always included; --region filters to global + a specific region (e.g. --region eu)")
+		} else {
+			before := len(entries)
+			entries = filterByRegion(entries, region)
+			logInfo("Filtered to global + %s: %d of %d entries", region, len(entries), before)
+		}
 	}
 
 	// Step 4: Parse formats
@@ -174,6 +192,17 @@ func convertToFormat(formatName string, entries []types.NetworkEntry) error {
 	}
 
 	return nil
+}
+
+// filterByRegion returns entries where Region is "global" or matches the given region (case-insensitive).
+func filterByRegion(entries []types.NetworkEntry, region string) []types.NetworkEntry {
+	var result []types.NetworkEntry
+	for _, entry := range entries {
+		if entry.Region == "global" || strings.EqualFold(entry.Region, region) {
+			result = append(result, entry)
+		}
+	}
+	return result
 }
 
 // substituteTenant replaces <tenant> placeholders in network entry values (hostnames/IPs) only

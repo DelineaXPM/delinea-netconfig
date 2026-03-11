@@ -341,6 +341,59 @@ func TestRunConvert(t *testing.T) {
 	}
 }
 
+func TestFilterByRegion(t *testing.T) {
+	entries := []types.NetworkEntry{
+		{Service: "svc1", Region: "global", Values: []string{"1.1.1.1"}},
+		{Service: "svc2", Region: "eu", Values: []string{"2.2.2.2"}},
+		{Service: "svc3", Region: "us", Values: []string{"3.3.3.3"}},
+		{Service: "svc4", Region: "au", Values: []string{"4.4.4.4"}},
+		{Service: "svc5", Region: "global", Values: []string{"5.5.5.5"}},
+	}
+
+	tests := []struct {
+		name     string
+		region   string
+		expected []string // expected service names
+	}{
+		{
+			name:     "eu includes global and eu only",
+			region:   "eu",
+			expected: []string{"svc1", "svc2", "svc5"},
+		},
+		{
+			name:     "us includes global and us only",
+			region:   "us",
+			expected: []string{"svc1", "svc3", "svc5"},
+		},
+		{
+			name:     "au includes global and au only",
+			region:   "au",
+			expected: []string{"svc1", "svc4", "svc5"},
+		},
+		{
+			name:     "case insensitive match",
+			region:   "EU",
+			expected: []string{"svc1", "svc2", "svc5"},
+		},
+		{
+			name:     "unknown region returns only global",
+			region:   "xyz",
+			expected: []string{"svc1", "svc5"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := filterByRegion(entries, tt.region)
+			var got []string
+			for _, e := range result {
+				got = append(got, e.Service)
+			}
+			assert.Equal(t, tt.expected, got)
+		})
+	}
+}
+
 func TestConvertToFormat(t *testing.T) {
 	entries := []types.NetworkEntry{
 		{
