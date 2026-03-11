@@ -12,10 +12,13 @@ import (
 )
 
 const (
-	defaultBaseURL      = "https://setup.delinea.app"
-	networkReqsPath     = "/network-requirements.json"
+	networkReqsPath      = "/network-requirements.json"
 	networkChangelogPath = "/network-requirements-changelog.md"
 )
+
+// defaultBaseURL is the default base URL for fetching network requirements.
+// It can be overridden in tests.
+var defaultBaseURL = "https://setup.delinea.app"
 
 var (
 	infoUpdates bool

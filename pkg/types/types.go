@@ -67,10 +67,18 @@ func parseDirection(raw json.RawMessage, direction string) (map[string]Service, 
 
 	// Try new format first: {"description": "...", "items": [...]}
 	var newFormat struct {
-		Description string           `json:"description"`
+		Description string            `json:"description"`
 		Items       []json.RawMessage `json:"items"`
+		HasItems    bool              `json:"-"`
 	}
-	if err := json.Unmarshal(raw, &newFormat); err == nil && len(newFormat.Items) > 0 {
+	// Check if "items" key exists in the JSON
+	var rawMap map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &rawMap); err == nil {
+		if _, ok := rawMap["items"]; ok {
+			newFormat.HasItems = true
+		}
+	}
+	if err := json.Unmarshal(raw, &newFormat); err == nil && newFormat.HasItems {
 		for _, itemRaw := range newFormat.Items {
 			var item serviceV2
 			if err := json.Unmarshal(itemRaw, &item); err != nil {

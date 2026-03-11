@@ -3,6 +3,8 @@ package cli
 import (
 	"bytes"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -767,6 +769,176 @@ func TestDisplayPortsSorted(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRunInfoUpdates(t *testing.T) {
+	changelogContent := "## [1.0.0] - 2026-02-26\n\n### Added\n- Initial release of network-requirements.json\n"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == networkChangelogPath {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(changelogContent))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	// Override base URL and flags
+	oldBase := defaultBaseURL
+	oldUpdates := infoUpdates
+	oldTenant := infoTenant
+	defaultBaseURL = server.URL
+	infoUpdates = true
+	infoTenant = ""
+	defer func() {
+		defaultBaseURL = oldBase
+		infoUpdates = oldUpdates
+		infoTenant = oldTenant
+	}()
+
+	// Capture stdout
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	cmd := &cobra.Command{}
+	err := runInfo(cmd, []string{})
+
+	w.Close()
+	os.Stdout = old
+
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, r)
+	output := buf.String()
+
+	assert.NoError(t, err)
+	assert.Contains(t, output, "## [1.0.0]")
+	assert.Contains(t, output, "Initial release")
+}
+
+func TestRunInfoLatest(t *testing.T) {
+	v2JSON := `{
+		"version": "2.0.0",
+		"updated_at": "2026-03-01T00:00:00Z",
+		"description": "Test network requirements",
+		"region_codes": {"us": "United States", "eu": "Europe"},
+		"outbound": {
+			"description": "Outbound",
+			"items": [
+				{
+					"id": "web_front_end",
+					"description": "Primary endpoint",
+					"protocol": "tcp",
+					"ports": [443],
+					"regions": {
+						"us": {"hostnames": ["test.delinea.app"]},
+						"eu": {"ipv4": ["10.0.0.0/8"]}
+					}
+				}
+			]
+		},
+		"inbound": {"description": "Inbound", "items": []}
+	}`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == networkReqsPath {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(v2JSON))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	// Override base URL and flags
+	oldBase := defaultBaseURL
+	oldLatest := infoLatest
+	oldTenant := infoTenant
+	defaultBaseURL = server.URL
+	infoLatest = true
+	infoTenant = ""
+	defer func() {
+		defaultBaseURL = oldBase
+		infoLatest = oldLatest
+		infoTenant = oldTenant
+	}()
+
+	// Capture stdout
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	cmd := &cobra.Command{}
+	err := runInfo(cmd, []string{})
+
+	w.Close()
+	os.Stdout = old
+
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, r)
+	output := buf.String()
+
+	assert.NoError(t, err)
+	assert.Contains(t, output, "Version:     2.0.0")
+	assert.Contains(t, output, "Updated:     2026-03-01T00:00:00Z")
+	assert.Contains(t, output, "Entries:     2")
+	assert.Contains(t, output, "Services:    1")
+	assert.Contains(t, output, "Regions:     2")
+	assert.Contains(t, output, "Region Codes:")
+	assert.Contains(t, output, "eu:")
+	assert.Contains(t, output, "us:")
+}
+
+func TestRunInfoUpdatesFetchError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	oldBase := defaultBaseURL
+	oldUpdates := infoUpdates
+	oldTenant := infoTenant
+	defaultBaseURL = server.URL
+	infoUpdates = true
+	infoTenant = ""
+	defer func() {
+		defaultBaseURL = oldBase
+		infoUpdates = oldUpdates
+		infoTenant = oldTenant
+	}()
+
+	cmd := &cobra.Command{}
+	err := runInfo(cmd, []string{})
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to fetch changelog")
+}
+
+func TestRunInfoLatestFetchError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	oldBase := defaultBaseURL
+	oldLatest := infoLatest
+	oldTenant := infoTenant
+	defaultBaseURL = server.URL
+	infoLatest = true
+	infoTenant = ""
+	defer func() {
+		defaultBaseURL = oldBase
+		infoLatest = oldLatest
+		infoTenant = oldTenant
+	}()
+
+	cmd := &cobra.Command{}
+	err := runInfo(cmd, []string{})
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to fetch network requirements")
 }
 
 func TestBuildBaseURL(t *testing.T) {

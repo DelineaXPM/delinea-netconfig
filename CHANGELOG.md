@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Tests for `info --updates` and `info --latest` flags using httptest mock server
+- Tests for fetch error handling on both flags
+
 ### Fixed
 - Support for new network-requirements.json v2 format (`items` array with `id`, flat `ports`, `protocol` fields)
 - Backward compatibility preserved for old v1 format (`tcp_ports`/`udp_ports`, nested `ports`, map-based services)
+- Parsing of v2 format with empty `items` array (e.g., `"inbound": {"items": []}`)
 
 ## [1.1.0] - 2026-03-11
 
