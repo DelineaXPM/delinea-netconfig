@@ -175,20 +175,34 @@ func normalizeService(direction, serviceName string, service types.Service) []ty
 	return entries
 }
 
-// getPorts extracts TCP and UDP ports from a service
+// getPorts extracts TCP and UDP ports from a service.
+// Supports both old format (tcp_ports/udp_ports/nested) and new format (flat ports + protocol).
 func getPorts(service types.Service) (tcpPorts, udpPorts []int) {
-	// Direct ports
+	// New format: flat ports with protocol field
+	if len(service.FlatPorts) > 0 {
+		switch service.Protocol {
+		case "udp":
+			return nil, service.FlatPorts
+		case "tcp", "":
+			return service.FlatPorts, nil
+		default:
+			// Unknown protocol, treat as TCP
+			return service.FlatPorts, nil
+		}
+	}
+
+	// Old format: direct tcp_ports/udp_ports
 	tcpPorts = service.TCPPorts
 	udpPorts = service.UDPPorts
 
-	// Nested ports (for services like AD Connector)
-	if service.Ports != nil {
-		if service.Ports.External != nil {
-			if len(service.Ports.External.TCPPorts) > 0 {
-				tcpPorts = append(tcpPorts, service.Ports.External.TCPPorts...)
+	// Old format: nested ports (for services like AD Connector)
+	if service.NestedPorts != nil {
+		if service.NestedPorts.External != nil {
+			if len(service.NestedPorts.External.TCPPorts) > 0 {
+				tcpPorts = append(tcpPorts, service.NestedPorts.External.TCPPorts...)
 			}
-			if len(service.Ports.External.UDPPorts) > 0 {
-				udpPorts = append(udpPorts, service.Ports.External.UDPPorts...)
+			if len(service.NestedPorts.External.UDPPorts) > 0 {
+				udpPorts = append(udpPorts, service.NestedPorts.External.UDPPorts...)
 			}
 		}
 	}

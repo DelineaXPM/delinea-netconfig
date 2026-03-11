@@ -398,7 +398,7 @@ func TestGetPorts(t *testing.T) {
 		{
 			name: "nested external ports",
 			service: types.Service{
-				Ports: &types.PortsNested{
+				NestedPorts: &types.PortsNested{
 					External: &types.PortSpec{
 						TCPPorts: []int{443},
 						UDPPorts: []int{53},
@@ -413,7 +413,7 @@ func TestGetPorts(t *testing.T) {
 			service: types.Service{
 				TCPPorts: []int{443},
 				UDPPorts: []int{53},
-				Ports: &types.PortsNested{
+				NestedPorts: &types.PortsNested{
 					External: &types.PortSpec{
 						TCPPorts: []int{8443},
 						UDPPorts: []int{123},
@@ -422,6 +422,32 @@ func TestGetPorts(t *testing.T) {
 			},
 			expectedTCPPorts: []int{443, 8443},
 			expectedUDPPorts: []int{53, 123},
+		},
+		{
+			name: "flat ports with tcp protocol (v2 format)",
+			service: types.Service{
+				FlatPorts: []int{443, 5671},
+				Protocol:  "tcp",
+			},
+			expectedTCPPorts: []int{443, 5671},
+			expectedUDPPorts: nil,
+		},
+		{
+			name: "flat ports with udp protocol (v2 format)",
+			service: types.Service{
+				FlatPorts: []int{1812, 1813},
+				Protocol:  "udp",
+			},
+			expectedTCPPorts: nil,
+			expectedUDPPorts: []int{1812, 1813},
+		},
+		{
+			name: "flat ports with empty protocol defaults to tcp",
+			service: types.Service{
+				FlatPorts: []int{443},
+			},
+			expectedTCPPorts: []int{443},
+			expectedUDPPorts: nil,
 		},
 		{
 			name:            "no ports",
