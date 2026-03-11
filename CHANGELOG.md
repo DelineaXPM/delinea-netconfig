@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `info --updates` flag to fetch and display the network requirements changelog from Delinea
+- `info --latest` flag to check the latest published version of network requirements
+- `info --tenant` flag for tenant-specific URL construction (e.g., `https://<tenant>.delinea.app`)
+
+### Changed
+- Updated default network requirements URL from `provisioning.delinea.app/.well-known/network-requirements.json` to `setup.delinea.app/network-requirements.json`
+- Removed all "NEW" markers from README.md (features are now established)
+- `info` command file argument is now optional when using `--updates` or `--latest`
+
+### Fixed
+- CI badge in README.md pointing to wrong repository
+
 ## [1.0.5] - 2026-02-11
 
 ### Fixed

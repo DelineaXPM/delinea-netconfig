@@ -6,7 +6,7 @@
 
 A CLI tool that converts Delinea's Platform IP/CIDR network requirements JSON into various firewall and infrastructure-as-code formats.
 
-## ✨ Features
+## Features
 
 - **Multiple Output Formats**: CSV, YAML, Terraform, Ansible, AWS Security Groups, Cisco ACL, PAN-OS XML ✅
 - **Diff & Info Commands**: Compare versions and show statistics ✅
@@ -20,8 +20,7 @@ A CLI tool that converts Delinea's Platform IP/CIDR network requirements JSON in
 
 ## 📦 Installation
 
-### Pre-built Binaries (Recommended) ✨
-
+### Pre-built Binaries (Recommended)
 Download the latest release for your platform from [GitHub Releases](https://github.com/DelineaLaari/delinea-netconfig/releases).
 
 **Quick install (Linux/macOS):**
@@ -39,8 +38,7 @@ tar -xzf delinea-netconfig_*_Linux_x86_64.tar.gz
 sudo mv delinea-netconfig /usr/local/bin/
 ```
 
-### Docker ✨
-
+### Docker
 ```bash
 # Pull the image
 docker pull ghcr.io/delinealaari/delinea-netconfig:latest
@@ -84,7 +82,7 @@ delinea-netconfig convert -f network-requirements.json --format csv,yaml,terrafo
 
 # Fetch from URL and convert
 delinea-netconfig convert \
-  -u https://provisioning.delinea.app/.well-known/network-requirements.json \
+  -u https://setup.delinea.app/network-requirements.json \
   --format terraform \
   --tenant mycompany
 
@@ -108,9 +106,9 @@ delinea-netconfig validate -f network-requirements.json
 |---------|-------------|
 | `convert` | Convert network requirements to different formats |
 | `validate` | Validate network requirements JSON structure |
-| `diff` | Compare two versions of network requirements files ✨ NEW |
-| `info` | Show statistics about network requirements ✨ NEW |
-| `completion` | Generate shell completion scripts (bash/zsh/fish/powershell) ✨ NEW |
+| `diff` | Compare two versions of network requirements files |
+| `info` | Show statistics about network requirements |
+| `completion` | Generate shell completion scripts (bash/zsh/fish/powershell) |
 | `help` | Show help for any command |
 | `version` | Show version information |
 
@@ -201,8 +199,7 @@ variable "delinea_outbound_platform_ssc_ips_global_ipv4" {
 
 **Use cases:** Infrastructure as Code, AWS/Azure/GCP deployments
 
-### Ansible ✨ NEW
-
+### Ansible
 Ansible variables for playbook integration:
 
 ```yaml
@@ -223,8 +220,7 @@ delinea_firewall_rules:
 
 **Use cases:** Ansible automation, configuration management
 
-### AWS Security Groups ✨ NEW
-
+### AWS Security Groups
 AWS Security Group JSON format:
 
 ```json
@@ -254,8 +250,7 @@ AWS Security Group JSON format:
 
 **Use cases:** AWS Security Groups, AWS CloudFormation
 
-### Cisco ACL ✨ NEW
-
+### Cisco ACL
 Cisco IOS Access Control List format:
 
 ```
@@ -281,8 +276,7 @@ ip access-list extended DELINEA-OUTBOUND
 
 **Use cases:** Cisco routers and switches, network automation
 
-### PAN-OS XML ✨ NEW
-
+### PAN-OS XML
 Palo Alto Networks XML configuration format:
 
 ```xml
@@ -343,8 +337,7 @@ Palo Alto Networks XML configuration format:
 - **GCP Firewall** - Google Cloud Platform firewall rules
 - **Custom templates** - User-defined Go templates
 
-### Compare Versions (diff) ✨ NEW
-
+### Compare Versions (diff)
 Compare two versions of network requirements to see what changed:
 
 ```bash
@@ -379,8 +372,7 @@ Summary:
   Total changes: 4
 ```
 
-### Statistics (info) ✨ NEW
-
+### Statistics (info)
 Show detailed statistics about network requirements:
 
 ```bash
@@ -422,8 +414,7 @@ Ports Used:
   123    (used 2 times)
 ```
 
-### Shell Completion ✨ NEW
-
+### Shell Completion
 Enable auto-completion for your shell:
 
 ```bash
@@ -530,8 +521,8 @@ delinea-netconfig/
 │       ├── terraform.go
 │       ├── ansible.go
 │       ├── aws_sg.go
-│       ├── cisco.go / cisco_test.go     # ✨ Phase 3
-│       └── panos.go / panos_test.go     # ✨ Phase 3
+│       ├── cisco.go / cisco_test.go
+│       └── panos.go / panos_test.go
 ├── pkg/
 │   └── types/                  # Shared types
 ├── testdata/
@@ -673,7 +664,7 @@ jobs:
       - name: Fetch and convert
         run: |
           delinea-netconfig convert \
-            -u https://provisioning.delinea.app/.well-known/network-requirements.json \
+            -u https://setup.delinea.app/network-requirements.json \
             --format terraform \
             --tenant ${{ secrets.DELINEA_TENANT }} \
             -o delinea.tf

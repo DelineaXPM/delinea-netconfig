@@ -769,6 +769,54 @@ func TestDisplayPortsSorted(t *testing.T) {
 	}
 }
 
+func TestBuildBaseURL(t *testing.T) {
+	tests := []struct {
+		name     string
+		tenant   string
+		expected string
+	}{
+		{
+			name:     "default (no tenant)",
+			tenant:   "",
+			expected: "https://setup.delinea.app",
+		},
+		{
+			name:     "with tenant",
+			tenant:   "mycompany",
+			expected: "https://mycompany.delinea.app",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			oldTenant := infoTenant
+			infoTenant = tt.tenant
+			defer func() { infoTenant = oldTenant }()
+
+			result := buildBaseURL()
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestRunInfoRequiresArgsOrFlags(t *testing.T) {
+	cmd := &cobra.Command{}
+
+	// Reset flags
+	oldUpdates := infoUpdates
+	oldLatest := infoLatest
+	infoUpdates = false
+	infoLatest = false
+	defer func() {
+		infoUpdates = oldUpdates
+		infoLatest = oldLatest
+	}()
+
+	err := runInfo(cmd, []string{})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "file argument required")
+}
+
 func TestRunInfo(t *testing.T) {
 	validJSON := `{
 		"version": "1.0",

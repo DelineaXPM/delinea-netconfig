@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/fetcher"
 	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/parser"
@@ -10,13 +11,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	defaultBaseURL      = "https://setup.delinea.app"
+	networkReqsPath     = "/network-requirements.json"
+	networkChangelogPath = "/network-requirements-changelog.md"
+)
+
+var (
+	infoUpdates bool
+	infoLatest  bool
+	infoTenant  string
+)
+
 var infoCmd = &cobra.Command{
-	Use:   "info <file>",
+	Use:   "info [file]",
 	Short: "Show statistics about network requirements",
-	Long: `Display statistical information about network requirements file.
+	Long: `Display statistical information about network requirements.
 
 Shows counts of entries by direction, service, region, protocol, and type.
 Useful for understanding the scope and complexity of network requirements.
+
+Use --updates to view the network requirements changelog from Delinea.
+Use --latest to check the latest published version of network requirements.
 
 Examples:
   # Show statistics for a file
@@ -25,19 +41,123 @@ Examples:
   # Show verbose statistics
   delinea-netconfig info -v network-requirements.json
 
-  # Show statistics in quiet mode
-  delinea-netconfig info -q network-requirements.json`,
-	Args: cobra.ExactArgs(1),
+  # View the network requirements changelog
+  delinea-netconfig info --updates
+
+  # View changelog from a specific tenant
+  delinea-netconfig info --updates --tenant mycompany
+
+  # Check the latest published version
+  delinea-netconfig info --latest
+
+  # Check latest version from a specific tenant
+  delinea-netconfig info --latest --tenant mycompany`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: runInfo,
 }
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
+	infoCmd.Flags().BoolVar(&infoUpdates, "updates", false, "show the network requirements changelog from Delinea")
+	infoCmd.Flags().BoolVar(&infoLatest, "latest", false, "show the latest published version of network requirements")
+	infoCmd.Flags().StringVar(&infoTenant, "tenant", "", "tenant name for URL construction (default: setup)")
 }
 
 func runInfo(cmd *cobra.Command, args []string) error {
-	file := args[0]
+	// Handle --updates flag
+	if infoUpdates {
+		return runInfoUpdates()
+	}
 
+	// Handle --latest flag
+	if infoLatest {
+		return runInfoLatest()
+	}
+
+	// Default: show statistics for a file (requires positional arg)
+	if len(args) == 0 {
+		return fmt.Errorf("file argument required (or use --updates / --latest)")
+	}
+
+	return runInfoStats(args[0])
+}
+
+// buildBaseURL constructs the base URL based on the tenant flag
+func buildBaseURL() string {
+	if infoTenant == "" {
+		return defaultBaseURL
+	}
+	return fmt.Sprintf("https://%s.delinea.app", infoTenant)
+}
+
+// runInfoUpdates fetches and displays the network requirements changelog
+func runInfoUpdates() error {
+	url := buildBaseURL() + networkChangelogPath
+
+	logInfo("Fetching network requirements changelog from %s", url)
+
+	data, err := fetcher.FetchFromURL(url)
+	if err != nil {
+		return fmt.Errorf("failed to fetch changelog: %w", err)
+	}
+
+	fmt.Print(string(data))
+	return nil
+}
+
+// runInfoLatest fetches the latest network requirements and shows version info
+func runInfoLatest() error {
+	url := buildBaseURL() + networkReqsPath
+
+	logInfo("Fetching latest network requirements from %s", url)
+
+	data, err := fetcher.FetchFromURL(url)
+	if err != nil {
+		return fmt.Errorf("failed to fetch network requirements: %w", err)
+	}
+
+	networkReqs, err := parser.Parse(data)
+	if err != nil {
+		return fmt.Errorf("failed to parse network requirements: %w", err)
+	}
+
+	entries := parser.Normalize(networkReqs)
+
+	fmt.Println("Latest Network Requirements")
+	fmt.Printf("  Version:     %s\n", networkReqs.Version)
+	if networkReqs.UpdatedAt != "" {
+		fmt.Printf("  Updated:     %s\n", networkReqs.UpdatedAt)
+	}
+	if networkReqs.Description != "" {
+		fmt.Printf("  Description: %s\n", networkReqs.Description)
+	}
+	fmt.Printf("  Source:      %s\n", url)
+	fmt.Printf("  Entries:     %d\n", len(entries))
+
+	// Count unique services
+	services := make(map[string]bool)
+	regions := make(map[string]bool)
+	for _, e := range entries {
+		services[e.Service] = true
+		regions[e.Region] = true
+	}
+	fmt.Printf("  Services:    %d\n", len(services))
+	fmt.Printf("  Regions:     %d\n", len(regions))
+
+	// List region codes if available
+	if len(networkReqs.RegionCodes) > 0 {
+		fmt.Println("\nRegion Codes:")
+		codes := sortedKeys(networkReqs.RegionCodes)
+		for _, code := range codes {
+			fmt.Printf("  %-6s %s\n", code+":", networkReqs.RegionCodes[code])
+		}
+	}
+
+	return nil
+}
+
+// runInfoStats shows statistics for a local file (original behavior)
+func runInfoStats(file string) error {
 	if !quiet {
 		fmt.Printf("Network Requirements Statistics\n")
 		fmt.Printf("File: %s\n\n", file)
@@ -52,6 +172,19 @@ func runInfo(cmd *cobra.Command, args []string) error {
 	networkReqs, err := parser.Parse(data)
 	if err != nil {
 		return fmt.Errorf("failed to parse file: %w", err)
+	}
+
+	// Show version info
+	if !quiet {
+		if networkReqs.Version != "" {
+			fmt.Printf("Version: %s\n", networkReqs.Version)
+		}
+		if networkReqs.UpdatedAt != "" {
+			fmt.Printf("Updated: %s\n", networkReqs.UpdatedAt)
+		}
+		if strings.TrimSpace(networkReqs.Version+networkReqs.UpdatedAt) != "" {
+			fmt.Println()
+		}
 	}
 
 	entries := parser.Normalize(networkReqs)

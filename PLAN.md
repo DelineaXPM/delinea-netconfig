@@ -64,7 +64,7 @@ delinea-netconfig [command] [flags]
 ```bash
 # Basic usage
 delinea-netconfig convert --file network-requirements.json --format terraform
-delinea-netconfig convert --url https://provisioning.delinea.app/.well-known/network-requirements.json --format ansible
+delinea-netconfig convert --url https://setup.delinea.app/network-requirements.json --format ansible
 
 # Output options
 delinea-netconfig convert -f network-requirements.json -o output.tf --format terraform
@@ -325,7 +325,7 @@ github.com/stretchr/testify        // Testing utilities
 
 **Deliverables**:
 - `delinea-netconfig convert -f network-requirements.json --format csv,yaml,terraform`
-- `delinea-netconfig convert -u https://provisioning.delinea.app/.well-known/network-requirements.json --format terraform`
+- `delinea-netconfig convert -u https://setup.delinea.app/network-requirements.json --format terraform`
 - `delinea-netconfig validate -f network-requirements.json`
 
 ### Phase 2: Production Ready (Week 3-4)

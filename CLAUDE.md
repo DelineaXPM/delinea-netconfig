@@ -492,7 +492,7 @@ make build && make test
 ./delinea-netconfig completion zsh > "${fpath[1]}/_delinea-netconfig"
 
 # Fetch from URL and convert
-./delinea-netconfig convert -u https://provisioning.delinea.app/.well-known/network-requirements.json --format terraform
+./delinea-netconfig convert -u https://setup.delinea.app/network-requirements.json --format terraform
 ```
 
 ### Testing
@@ -632,7 +632,7 @@ All Phase 3 items have been implemented:
 
 ### External Resources
 - [Delinea Platform](https://delinea.com)
-- [Network Requirements JSON](https://provisioning.delinea.app/.well-known/network-requirements.json)
+- [Network Requirements JSON](https://setup.delinea.app/network-requirements.json)
 - [Go Documentation](https://go.dev/doc/)
 - [Cobra CLI Framework](https://cobra.dev/)
 
