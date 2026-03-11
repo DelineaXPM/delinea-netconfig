@@ -777,7 +777,7 @@ func TestRunInfoUpdates(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == networkChangelogPath {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(changelogContent))
+			_, _ = w.Write([]byte(changelogContent))
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}
@@ -845,7 +845,7 @@ func TestRunInfoLatest(t *testing.T) {
 		if r.URL.Path == networkReqsPath {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(v2JSON))
+			_, _ = w.Write([]byte(v2JSON))
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}
