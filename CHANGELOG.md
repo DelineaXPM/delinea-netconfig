@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-11
+
+### Added
+- **`tui` command** — full interactive terminal UI powered by Bubble Tea + Bubbles + Lip Gloss + Huh
+  - **Browser screen**: scrollable, filterable entry list with outbound/inbound tab toggle (`tab`), live text filter (`/`), region filter (`r` to type, `x` to clear), and key navigation (`j`/`k`)
+  - **Detail screen**: full entry detail with scrollable viewport, copy IPs to clipboard (`c`)
+  - **Export screen**: interactive huh form to choose format, scope (all/filtered/service), tenant, region, and output file — with spinner while writing
+  - **Diff screen**: tabbed diff view (All/Added/Removed/Modified) with colour-coded entries (green `+`, red `-`, yellow `~`), launched with `--diff old.json new.json`
+  - **File picker screen**: shown when no `-f` flag is given — browse to any `.json` file
+  - `-f/--file` flag to load a local file directly, `-u/--url` flag to load from a remote URL
+- **`internal/differ` package** — extracted diff comparison logic (`Compare`, `EntryKey`, `EntriesEqual`, `SortEntries`) into a shared package used by both the `diff` CLI command and the TUI diff screen
+- `tui` and `tui-diff` Makefile targets for quick development iteration
+
 ## [1.2.1] - 2026-03-11
 
 ### Changed

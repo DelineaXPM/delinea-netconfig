@@ -1,4 +1,4 @@
-.PHONY: help build install test test-unit test-integration test-coverage clean fmt vet lint run
+.PHONY: help build install test test-unit test-integration test-coverage clean fmt vet lint run tui tui-diff
 
 # Variables
 BINARY_NAME=delinea-netconfig
@@ -20,6 +20,8 @@ help:
 	@echo "  vet                - Run go vet"
 	@echo "  lint               - Run golangci-lint (requires golangci-lint installed)"
 	@echo "  run                - Run the tool (pass args with ARGS=...)"
+	@echo "  tui                - Launch interactive TUI (ARGS='-f file.json')"
+	@echo "  tui-diff           - Launch TUI diff mode (ARGS='old.json new.json')"
 	@echo ""
 	@echo "Quick format tests:"
 	@echo "  test-csv           - Test CSV conversion"
@@ -91,6 +93,14 @@ lint:
 run: build
 	@echo "Running $(BINARY_NAME)..."
 	./$(BINARY_NAME) $(ARGS)
+
+# Launch the interactive TUI
+tui: build
+	@./$(BINARY_NAME) tui $(ARGS)
+
+# Launch TUI in diff mode (pass two files with ARGS='old.json new.json')
+tui-diff: build
+	@./$(BINARY_NAME) tui --diff $(ARGS)
 
 # Quick test - convert to CSV
 test-csv: build
