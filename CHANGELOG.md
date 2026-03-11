@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-03-11
+
 ### Changed
 - Replaced archived `gopkg.in/yaml.v3` with actively maintained `github.com/goccy/go-yaml`
 
 ### Added
 - Tests for `parser.Parse` covering v1 format, v2 format, missing version, invalid JSON, and empty input
 - Tests for `runDiff` command covering added/removed entries, summary-only flag, identical files, missing files, and invalid JSON
+
+### Fixed
+- Lint: unchecked `w.Write` return values in `info_test.go` httptest handlers
 
 ## [1.2.0] - 2026-03-11
 
