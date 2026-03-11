@@ -176,7 +176,7 @@ func convertToFormat(formatName string, entries []types.NetworkEntry) error {
 	return nil
 }
 
-// substituteTenant replaces <tenant> placeholders in all network entry values and descriptions
+// substituteTenant replaces <tenant> placeholders in network entry values (hostnames/IPs) only
 func substituteTenant(entries []types.NetworkEntry, tenant string) []types.NetworkEntry {
 	result := make([]types.NetworkEntry, len(entries))
 
@@ -184,7 +184,7 @@ func substituteTenant(entries []types.NetworkEntry, tenant string) []types.Netwo
 		// Copy the entry
 		result[i] = entry
 
-		// Substitute in values
+		// Substitute in values only (hostnames/IPs)
 		if len(entry.Values) > 0 {
 			newValues := make([]string, len(entry.Values))
 			for j, value := range entry.Values {
@@ -192,9 +192,6 @@ func substituteTenant(entries []types.NetworkEntry, tenant string) []types.Netwo
 			}
 			result[i].Values = newValues
 		}
-
-		// Substitute in description (for URLs and instructions)
-		result[i].Description = strings.ReplaceAll(entry.Description, "<tenant>", tenant)
 	}
 
 	return result

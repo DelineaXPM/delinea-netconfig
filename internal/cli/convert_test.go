@@ -33,7 +33,7 @@ func TestSubstituteTenant(t *testing.T) {
 			},
 			tenant:         "mycompany",
 			expectedValues: []string{"mycompany.secretservercloud.com", "api.mycompany.secretservercloud.com"},
-			expectedDesc:   "Secret Server for mycompany",
+			expectedDesc:   "Secret Server for <tenant>",
 		},
 		{
 			name: "handles multiple placeholders in single value",
@@ -49,7 +49,7 @@ func TestSubstituteTenant(t *testing.T) {
 			},
 			tenant:         "acme",
 			expectedValues: []string{"acme-acme.example.com"},
-			expectedDesc:   "acme service for acme",
+			expectedDesc:   "<tenant> service for <tenant>",
 		},
 		{
 			name: "preserves entries without placeholders",
@@ -81,7 +81,7 @@ func TestSubstituteTenant(t *testing.T) {
 			},
 			tenant:         "test",
 			expectedValues: []string{},
-			expectedDesc:   "Empty values for test",
+			expectedDesc:   "Empty values for <tenant>",
 		},
 		{
 			name: "handles nil values array",
@@ -97,7 +97,7 @@ func TestSubstituteTenant(t *testing.T) {
 			},
 			tenant:         "test",
 			expectedValues: nil,
-			expectedDesc:   "Nil values for test",
+			expectedDesc:   "Nil values for <tenant>",
 		},
 		{
 			name: "case sensitive replacement",
@@ -113,7 +113,7 @@ func TestSubstituteTenant(t *testing.T) {
 			},
 			tenant:         "mycompany",
 			expectedValues: []string{"<TENANT>.example.com", "mycompany.example.com"},
-			expectedDesc:   "<TENANT> and mycompany",
+			expectedDesc:   "<TENANT> and <tenant>",
 		},
 	}
 
@@ -177,13 +177,13 @@ func TestSubstituteTenantMultipleEntries(t *testing.T) {
 
 	// First entry
 	assert.Equal(t, []string{"testco.example.com"}, result[0].Values)
-	assert.Equal(t, "Service 1 for testco", result[0].Description)
+	assert.Equal(t, "Service 1 for <tenant>", result[0].Description)
 	assert.Equal(t, "service1", result[0].Service)
 	assert.Equal(t, "us", result[0].Region)
 
 	// Second entry
 	assert.Equal(t, []string{"api.testco.example.com", "testco-cdn.example.com"}, result[1].Values)
-	assert.Equal(t, "testco CDN", result[1].Description)
+	assert.Equal(t, "<tenant> CDN", result[1].Description)
 	assert.Equal(t, "service2", result[1].Service)
 	assert.Equal(t, "eu", result[1].Region)
 
@@ -217,9 +217,9 @@ func TestSubstituteTenantDoesNotModifyOriginal(t *testing.T) {
 	assert.Equal(t, originalValues, original[0].Values[0], "original values should not be modified")
 	assert.Equal(t, originalDesc, original[0].Description, "original description should not be modified")
 
-	// Verify result has the substitution
+	// Verify result has the substitution in values only
 	assert.Equal(t, "mycompany.example.com", result[0].Values[0])
-	assert.Equal(t, "Test mycompany", result[0].Description)
+	assert.Equal(t, "Test <tenant>", result[0].Description)
 }
 
 func TestRunConvert(t *testing.T) {
