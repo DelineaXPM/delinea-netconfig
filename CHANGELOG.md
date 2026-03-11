@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-11
+
 ### Added
 - `--region` / `-r` flag on `convert` command to filter output to global + region-specific rules (e.g. `--region eu`, `--region au`)
 
