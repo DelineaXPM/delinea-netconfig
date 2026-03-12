@@ -32,11 +32,6 @@ type diffKeyMap struct {
 	Quit    key.Binding
 }
 
-// exportKeyMap defines keys for the export screen.
-type exportKeyMap struct {
-	Cancel key.Binding
-}
-
 var browserKeys = browserKeyMap{
 	Up: key.NewBinding(
 		key.WithKeys("up", "k"),
@@ -118,12 +113,6 @@ var diffKeys = diffKeyMap{
 	),
 }
 
-var exportKeys = exportKeyMap{
-	Cancel: key.NewBinding(
-		key.WithKeys("esc"),
-		key.WithHelp("esc", "cancel"),
-	),
-}
 
 // helpLine returns a formatted help string for the given bindings.
 func helpLine(bindings ...key.Binding) string {

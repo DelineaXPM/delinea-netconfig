@@ -91,12 +91,6 @@ var (
 	styleError = lipgloss.NewStyle().
 			Foreground(colorDanger).
 			Bold(true)
-
-	// Border style for panels
-	styleBorder = lipgloss.NewStyle().
-			BorderStyle(lipgloss.RoundedBorder()).
-			BorderForeground(colorMuted).
-			Padding(0, 1)
 )
 
 // tabLabel renders a tab with active/inactive styling.
