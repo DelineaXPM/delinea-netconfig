@@ -722,7 +722,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## 🙏 Acknowledgments
 
 - Built with [Cobra](https://cobra.dev/) CLI framework
-- Uses [yaml.v3](https://github.com/go-yaml/yaml) for YAML processing
+- Uses [goccy/go-yaml](https://github.com/goccy/go-yaml) for YAML processing
 - Inspired by the need for easy network requirement management
 
 ---
