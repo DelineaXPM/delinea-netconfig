@@ -723,6 +723,8 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 - Built with [Cobra](https://cobra.dev/) CLI framework
 - Uses [goccy/go-yaml](https://github.com/goccy/go-yaml) for YAML processing
+- Interactive TUI powered by [Bubble Tea](https://github.com/charmbracelet/bubbletea), [Bubbles](https://github.com/charmbracelet/bubbles), [Lip Gloss](https://github.com/charmbracelet/lipgloss), and [Huh](https://github.com/charmbracelet/huh) from [Charm](https://charm.sh/)
+- Clipboard support via [atotto/clipboard](https://github.com/atotto/clipboard)
 - Inspired by the need for easy network requirement management
 
 ---
