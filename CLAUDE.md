@@ -1004,19 +1004,6 @@ Use this to decide your approach:
 
 ---
 
-## Contacts
-
-### Project Lead
-- **Name:** Adil Laari
-- **Email:** adil.laari@delinea.com
-- **Role:** Architect / Engineer / PM
-
-### Support
-- **GitHub Issues:** https://github.com/DelineaXPM/delinea-platform/issues
-- **Documentation:** https://docs.delinea.com
-
----
-
 ## Session End Checklist
 
 Before ending a Claude Code session:
