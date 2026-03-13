@@ -33,6 +33,10 @@ vendor/
 # Claude Code user-specific settings (SHOULD be ignored)
 .claude/
 
+# Internal development docs (not for public consumption)
+CLAUDE.md
+PLAN.md
+
 # Environment files (if you add any)
 .env
 .env.local
