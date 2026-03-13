@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-03-13
+
 ### Changed
 - `convert`, `validate`, `tui`, and `info` commands now default to `https://setup.delinea.app/network-requirements.json` when neither `-f` nor `-u` is specified — no flags required for the common case
 
