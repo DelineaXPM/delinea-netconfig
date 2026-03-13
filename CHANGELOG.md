@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-03-13
+
+### Changed
+- All `setup.delinea.app` URLs now use extension-free paths (`/network-requirements` and `/network-requirements-changelog`) — the server supports content negotiation without file extensions
+
+### Removed
+- `CLAUDE.md` and `PLAN.md` removed from version control (added to `.gitignore`) — internal development docs not intended for public consumption
+
+### Fixed
+- Stale absolute path in `TESTING.md` corrected to use the project directory name
+
 ## [1.5.0] - 2026-03-13
 
 ### Added
