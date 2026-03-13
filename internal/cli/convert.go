@@ -39,7 +39,7 @@ Examples:
 
   # Convert for a specific region (includes global + region-specific rules)
   delinea-netconfig convert -f network-requirements.json --format csv --region eu
-  delinea-netconfig convert -u https://setup.delinea.app/network-requirements.json --format yaml --tenant mycompany --region au
+  delinea-netconfig convert -u https://setup.delinea.app/network-requirements --format yaml --tenant mycompany --region au
 
   # Convert to multiple formats
   delinea-netconfig convert -f network-requirements.json --format csv,yaml,terraform

@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	networkReqsPath      = "/network-requirements.json"
-	networkChangelogPath = "/network-requirements-changelog.md"
+	networkReqsPath      = "/network-requirements"
+	networkChangelogPath = "/network-requirements-changelog"
 )
 
 // defaultBaseURL is the default base URL for fetching network requirements.

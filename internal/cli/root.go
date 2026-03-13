@@ -19,7 +19,7 @@ var (
 
 // defaultNetworkReqsURL is the canonical Delinea network requirements URL,
 // used as a fallback when no -f or -u flag is provided.
-const defaultNetworkReqsURL = "https://setup.delinea.app/network-requirements.json"
+const defaultNetworkReqsURL = "https://setup.delinea.app/network-requirements"
 
 var (
 	// Global flags

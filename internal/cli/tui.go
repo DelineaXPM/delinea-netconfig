@@ -37,7 +37,7 @@ Examples:
   delinea-netconfig tui -f network-requirements.json
 
   # Load from a remote URL
-  delinea-netconfig tui -u https://setup.delinea.app/network-requirements.json
+  delinea-netconfig tui -u https://setup.delinea.app/network-requirements
 
   # Compare two versions interactively
   delinea-netconfig tui --diff old.json new.json`,

@@ -60,7 +60,7 @@ delinea-netconfig convert -f network-requirements.json --format terraform --tena
 
 # Fetch from URL and convert
 delinea-netconfig convert \
-  -u https://setup.delinea.app/network-requirements.json \
+  -u https://setup.delinea.app/network-requirements \
   --format terraform --tenant mycompany
 
 # Save multiple formats to a directory
@@ -81,7 +81,7 @@ delinea-netconfig tui
 delinea-netconfig tui -f network-requirements.json
 
 # Load from a remote URL
-delinea-netconfig tui -u https://setup.delinea.app/network-requirements.json
+delinea-netconfig tui -u https://setup.delinea.app/network-requirements
 
 # Compare two versions interactively
 delinea-netconfig tui --diff old.json new.json
@@ -312,7 +312,7 @@ jobs:
       - name: Fetch and convert
         run: |
           delinea-netconfig convert \
-            -u https://setup.delinea.app/network-requirements.json \
+            -u https://setup.delinea.app/network-requirements \
             --format terraform \
             --tenant ${{ secrets.DELINEA_TENANT }} \
             -o delinea.tf
