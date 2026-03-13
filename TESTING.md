@@ -43,7 +43,7 @@ go version
 Once Go is installed:
 
 ```bash
-cd /Users/adil.laari/delinea-parser
+cd delinea-netconfig
 
 # Download all dependencies
 go mod download
