@@ -971,22 +971,33 @@ func TestBuildBaseURL(t *testing.T) {
 	}
 }
 
-func TestRunInfoRequiresArgsOrFlags(t *testing.T) {
-	cmd := &cobra.Command{}
+func TestRunInfoDefaultsToURL(t *testing.T) {
+	minimalJSON := `{"version":"2.0","updated_at":"2026-01-01","items":[{"id":"svc","direction":"outbound","region":"global","type":"ipv4","values":["1.2.3.4/32"],"protocol":"tcp","ports":[443],"description":"test"}]}`
 
-	// Reset flags
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == networkReqsPath {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(minimalJSON))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	oldBase := defaultBaseURL
 	oldUpdates := infoUpdates
 	oldLatest := infoLatest
+	defaultBaseURL = server.URL
 	infoUpdates = false
 	infoLatest = false
 	defer func() {
+		defaultBaseURL = oldBase
 		infoUpdates = oldUpdates
 		infoLatest = oldLatest
 	}()
 
-	err := runInfo(cmd, []string{})
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "file argument required")
+	err := runInfo(&cobra.Command{}, []string{})
+	assert.NoError(t, err)
 }
 
 func TestRunInfo(t *testing.T) {

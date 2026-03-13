@@ -30,7 +30,7 @@ Features:
   • Compare two versions in interactive diff view (--diff)
 
 Examples:
-  # Launch browser (file picker if no -f given)
+  # Launch browser (defaults to setup.delinea.app if no -f or -u given)
   delinea-netconfig tui
 
   # Load a specific file directly
@@ -53,7 +53,11 @@ func init() {
 }
 
 func runTUI(cmd *cobra.Command, args []string) error {
-	cfg := tui.Config{FilePath: tuiFile, URL: tuiURL, DiffMode: tuiDiffMode}
+	url := tuiURL
+	if tuiFile == "" && url == "" && !tuiDiffMode {
+		url = defaultNetworkReqsURL
+	}
+	cfg := tui.Config{FilePath: tuiFile, URL: url, DiffMode: tuiDiffMode}
 
 	if tuiDiffMode {
 		if len(args) != 2 {

@@ -77,9 +77,11 @@ func runInfo(cmd *cobra.Command, args []string) error {
 		return runInfoLatest()
 	}
 
-	// Default: show statistics for a file (requires positional arg)
+	// Default: show statistics — file arg or fall back to default URL
 	if len(args) == 0 {
-		return fmt.Errorf("file argument required (or use --updates / --latest)")
+		url := buildBaseURL() + networkReqsPath
+		logInfo("No file specified, using default: %s", url)
+		return runInfoStatsFromURL(url)
 	}
 
 	return runInfoStats(args[0])
@@ -159,25 +161,36 @@ func runInfoLatest() error {
 	return nil
 }
 
-// runInfoStats shows statistics for a local file (original behavior)
+// runInfoStats shows statistics for a local file.
 func runInfoStats(file string) error {
-	if !quiet {
-		fmt.Printf("Network Requirements Statistics\n")
-		fmt.Printf("File: %s\n\n", file)
-	}
-
-	// Read and parse file
 	data, err := fetcher.FetchFromFile(file)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
+	return runInfoStatsFromData(file, data)
+}
+
+// runInfoStatsFromURL fetches from a URL and shows statistics.
+func runInfoStatsFromURL(url string) error {
+	data, err := fetcher.FetchFromURL(url)
+	if err != nil {
+		return fmt.Errorf("failed to fetch from URL: %w", err)
+	}
+	return runInfoStatsFromData(url, data)
+}
+
+// runInfoStatsFromData parses and displays statistics for already-fetched data.
+func runInfoStatsFromData(source string, data []byte) error {
+	if !quiet {
+		fmt.Printf("Network Requirements Statistics\n")
+		fmt.Printf("Source: %s\n\n", source)
+	}
 
 	networkReqs, err := parser.Parse(data)
 	if err != nil {
-		return fmt.Errorf("failed to parse file: %w", err)
+		return fmt.Errorf("failed to parse: %w", err)
 	}
 
-	// Show version info
 	if !quiet {
 		if networkReqs.Version != "" {
 			fmt.Printf("Version: %s\n", networkReqs.Version)
@@ -191,11 +204,7 @@ func runInfoStats(file string) error {
 	}
 
 	entries := parser.Normalize(networkReqs)
-
-	// Collect statistics
 	stats := collectStatistics(entries)
-
-	// Display statistics
 	displayStatistics(stats)
 
 	return nil

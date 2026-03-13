@@ -33,8 +33,6 @@ func init() {
 	validateCmd.Flags().StringVarP(&inputFile, "file", "f", "", "path to network-requirements.json file")
 	validateCmd.Flags().StringVarP(&inputURL, "url", "u", "", "URL to fetch network-requirements.json")
 
-	// Mark file or url as required (at least one)
-	validateCmd.MarkFlagsOneRequired("file", "url")
 	validateCmd.MarkFlagsMutuallyExclusive("file", "url")
 }
 
@@ -51,9 +49,14 @@ func runValidate(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to read file: %w", err)
 		}
-	} else if inputURL != "" {
-		logVerbose("Fetching from URL: %s", inputURL)
-		data, err = fetcher.FetchFromURL(inputURL)
+	} else {
+		url := inputURL
+		if url == "" {
+			url = defaultNetworkReqsURL
+			logInfo("No file or URL specified, using default: %s", url)
+		}
+		logVerbose("Fetching from URL: %s", url)
+		data, err = fetcher.FetchFromURL(url)
 		if err != nil {
 			return fmt.Errorf("failed to fetch from URL: %w", err)
 		}
