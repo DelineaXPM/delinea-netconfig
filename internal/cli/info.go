@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -23,6 +25,7 @@ var defaultBaseURL = "https://setup.delinea.app"
 var (
 	infoUpdates bool
 	infoLatest  bool
+	infoRaw     bool
 	infoTenant  string
 )
 
@@ -36,6 +39,7 @@ Useful for understanding the scope and complexity of network requirements.
 
 Use --updates to view the network requirements changelog from Delinea.
 Use --latest to check the latest published version of network requirements.
+Use --raw to print the raw JSON (pretty-printed), equivalent to curl -s URL | jq .
 
 Examples:
   # Show statistics for a file
@@ -54,7 +58,13 @@ Examples:
   delinea-netconfig info --latest
 
   # Check latest version from a specific tenant
-  delinea-netconfig info --latest --tenant mycompany`,
+  delinea-netconfig info --latest --tenant mycompany
+
+  # Print raw JSON (pretty-printed) from default URL
+  delinea-netconfig info --raw
+
+  # Print raw JSON from a local file
+  delinea-netconfig info --raw network-requirements.json`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runInfo,
 }
@@ -63,6 +73,7 @@ func init() {
 	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().BoolVar(&infoUpdates, "updates", false, "show the network requirements changelog from Delinea")
 	infoCmd.Flags().BoolVar(&infoLatest, "latest", false, "show the latest published version of network requirements")
+	infoCmd.Flags().BoolVar(&infoRaw, "raw", false, "print the raw JSON pretty-printed (like curl | jq)")
 	infoCmd.Flags().StringVar(&infoTenant, "tenant", "", "tenant name for URL construction (default: setup)")
 }
 
@@ -75,6 +86,16 @@ func runInfo(cmd *cobra.Command, args []string) error {
 	// Handle --latest flag
 	if infoLatest {
 		return runInfoLatest()
+	}
+
+	// Handle --raw flag
+	if infoRaw {
+		if len(args) > 0 {
+			return runInfoRawFromFile(args[0])
+		}
+		url := buildBaseURL() + networkReqsPath
+		logInfo("No file specified, using default: %s", url)
+		return runInfoRawFromURL(url)
 	}
 
 	// Default: show statistics — file arg or fall back to default URL
@@ -93,6 +114,34 @@ func buildBaseURL() string {
 		return defaultBaseURL
 	}
 	return fmt.Sprintf("https://%s.delinea.app", infoTenant)
+}
+
+// runInfoRawFromFile reads a local file and prints it as pretty-printed JSON.
+func runInfoRawFromFile(file string) error {
+	data, err := fetcher.FetchFromFile(file)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
+	}
+	return printPrettyJSON(data)
+}
+
+// runInfoRawFromURL fetches a URL and prints it as pretty-printed JSON.
+func runInfoRawFromURL(url string) error {
+	data, err := fetcher.FetchFromURL(url)
+	if err != nil {
+		return fmt.Errorf("failed to fetch from URL: %w", err)
+	}
+	return printPrettyJSON(data)
+}
+
+// printPrettyJSON pretty-prints raw JSON bytes to stdout.
+func printPrettyJSON(data []byte) error {
+	var buf bytes.Buffer
+	if err := json.Indent(&buf, data, "", "  "); err != nil {
+		return fmt.Errorf("failed to format JSON: %w", err)
+	}
+	fmt.Println(buf.String())
+	return nil
 }
 
 // runInfoUpdates fetches and displays the network requirements changelog

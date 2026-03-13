@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `info --raw` flag: fetches and pretty-prints the raw network requirements JSON (equivalent to `curl -s URL | jq .`); works with a local file argument or defaults to `setup.delinea.app`
+
 ## [1.4.0] - 2026-03-13
 
 ### Changed

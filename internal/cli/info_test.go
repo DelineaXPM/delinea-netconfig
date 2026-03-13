@@ -1060,3 +1060,97 @@ func TestRunInfo(t *testing.T) {
 		assert.Contains(t, err.Error(), "failed to read file")
 	})
 }
+
+func TestRunInfoRaw_FromFile(t *testing.T) {
+	rawJSON := `{"version":"2.0","outbound":{"description":"out","items":[]},"inbound":{"description":"in","items":[]}}`
+
+	tmpDir := t.TempDir()
+	tmpFile := filepath.Join(tmpDir, "raw.json")
+	require.NoError(t, os.WriteFile(tmpFile, []byte(rawJSON), 0644))
+
+	oldRaw := infoRaw
+	oldUpdates := infoUpdates
+	oldLatest := infoLatest
+	infoRaw = true
+	infoUpdates = false
+	infoLatest = false
+	defer func() {
+		infoRaw = oldRaw
+		infoUpdates = oldUpdates
+		infoLatest = oldLatest
+	}()
+
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := runInfo(&cobra.Command{}, []string{tmpFile})
+
+	w.Close()
+	os.Stdout = old
+
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, r)
+	output := buf.String()
+
+	assert.NoError(t, err)
+	// Pretty-printed JSON should have newlines and indentation
+	assert.Contains(t, output, `"version"`)
+	assert.Contains(t, output, "\n")
+	assert.Contains(t, output, "  ")
+}
+
+func TestRunInfoRaw_DefaultURL(t *testing.T) {
+	rawJSON := `{"version":"2.0","outbound":{"description":"out","items":[]},"inbound":{"description":"in","items":[]}}`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == networkReqsPath {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(rawJSON))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	oldBase := defaultBaseURL
+	oldRaw := infoRaw
+	oldUpdates := infoUpdates
+	oldLatest := infoLatest
+	oldTenant := infoTenant
+	defaultBaseURL = server.URL
+	infoRaw = true
+	infoUpdates = false
+	infoLatest = false
+	infoTenant = ""
+	defer func() {
+		defaultBaseURL = oldBase
+		infoRaw = oldRaw
+		infoUpdates = oldUpdates
+		infoLatest = oldLatest
+		infoTenant = oldTenant
+	}()
+
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := runInfo(&cobra.Command{}, []string{})
+
+	w.Close()
+	os.Stdout = old
+
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, r)
+	output := buf.String()
+
+	assert.NoError(t, err)
+	assert.Contains(t, output, `"version"`)
+	assert.Contains(t, output, "\n")
+}
+
+func TestPrintPrettyJSON_InvalidJSON(t *testing.T) {
+	err := printPrettyJSON([]byte("not valid json"))
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to format JSON")
+}
