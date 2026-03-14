@@ -24,9 +24,6 @@ Show
 
 # ─── 1. Check the latest published requirements ───────────────────────────────
 Sleep 300ms
-Type "# Check what Delinea has published — no file needed"
-Enter
-Sleep 600ms
 Type "delinea-netconfig info --latest"
 Enter
 Sleep 5s
@@ -36,9 +33,6 @@ Enter
 Sleep 300ms
 
 # ─── 2. Full statistics — fetched live from setup.delinea.app ─────────────────
-Type "# Full statistics fetched live from setup.delinea.app"
-Enter
-Sleep 600ms
 Type "delinea-netconfig info"
 Enter
 Sleep 5s
@@ -48,9 +42,6 @@ Enter
 Sleep 300ms
 
 # ─── 3. Convert to CSV — straight from the URL ───────────────────────────────
-Type "# Convert to CSV — straight from setup.delinea.app"
-Enter
-Sleep 600ms
 Type "delinea-netconfig convert -u https://setup.delinea.app/network-requirements --format csv | head -8"
 Enter
 Sleep 6s
@@ -60,9 +51,6 @@ Enter
 Sleep 300ms
 
 # ─── 4. Convert to Terraform with tenant substitution ────────────────────────
-Type "# Terraform output with your tenant name substituted in"
-Enter
-Sleep 600ms
 Type "delinea-netconfig convert -u https://setup.delinea.app/network-requirements --format terraform --tenant mycompany | head -14"
 Enter
 Sleep 6s
@@ -72,9 +60,6 @@ Enter
 Sleep 300ms
 
 # ─── 5. Validate the live requirements ───────────────────────────────────────
-Type "# Validate the live requirements"
-Enter
-Sleep 600ms
 Type "delinea-netconfig validate"
 Enter
 Sleep 5s
@@ -84,9 +69,6 @@ Enter
 Sleep 300ms
 
 # ─── 6. Raw JSON — like curl | jq but built-in ───────────────────────────────
-Type "# Pretty-print the raw JSON — built-in curl | jq"
-Enter
-Sleep 600ms
 Type "delinea-netconfig info --raw | head -20"
 Enter
 Sleep 5s
@@ -96,9 +78,6 @@ Enter
 Sleep 300ms
 
 # ─── 7. Interactive TUI — defaults to setup.delinea.app ──────────────────────
-Type "# Interactive TUI — no flags needed, loads from setup.delinea.app"
-Enter
-Sleep 600ms
 Type "delinea-netconfig tui"
 Enter
 Sleep 4s
