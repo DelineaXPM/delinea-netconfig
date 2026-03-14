@@ -15,7 +15,7 @@ Set PlaybackSpeed 1
 
 # ─── Setup (hidden) ───────────────────────────────────────────────────────────
 Hide
-Type "make build 2>/dev/null"
+Type "make build 2>/dev/null && export PATH=$PATH:$(pwd)"
 Enter
 Sleep 3s
 Type "clear"
