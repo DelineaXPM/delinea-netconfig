@@ -10,7 +10,7 @@ Set Width 1200
 Set Height 700
 Set Shell "zsh"
 Set Padding 20
-Set FontFamily "JetBrains Mono"
+Set FontFamily "Monaspace Neon"
 Set PlaybackSpeed 1
 
 # ─── Setup (hidden) ───────────────────────────────────────────────────────────
