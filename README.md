@@ -6,6 +6,9 @@
 
 Convert Delinea's Platform IP/CIDR network requirements JSON into firewall rules and infrastructure-as-code formats — via CLI or an interactive terminal UI.
 
+<!-- demo gif will go here once recorded -->
+<!-- ![delinea-netconfig demo](demo/demo.gif) -->
+
 ## Features
 
 - **Interactive TUI** — browse, filter, inspect, export, and diff entries without remembering flags
