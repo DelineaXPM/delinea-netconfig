@@ -59,6 +59,7 @@ temp/
 .goreleaser/
 
 # Demo output (GIF/MP4 produced by vhs — committed separately or via CI)
-demo/*.gif
 demo/*.mp4
 demo/*.webp
+demo/*.gif
+!demo/demo.gif
