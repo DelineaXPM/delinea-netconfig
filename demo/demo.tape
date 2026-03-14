@@ -11,6 +11,7 @@ Set Height 700
 Set Shell "zsh"
 Set Padding 20
 Set FontFamily "Monaspace Neon"
+Set WindowBar Colorful
 Set PlaybackSpeed 1
 
 # ─── Setup (hidden) ───────────────────────────────────────────────────────────
