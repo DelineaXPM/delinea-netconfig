@@ -1,5 +1,6 @@
 # delinea-netconfig demo
 # Run from the repo root: vhs demo/demo.tape
+# Requires: make build (binary must exist at ./delinea-netconfig)
 
 Output demo/demo.gif
 
@@ -12,7 +13,7 @@ Set Padding 20
 Set FontFamily "JetBrains Mono"
 Set PlaybackSpeed 1
 
-# ─── Build ────────────────────────────────────────────────────────────────────
+# ─── Setup (hidden) ───────────────────────────────────────────────────────────
 Hide
 Type "make build 2>/dev/null"
 Enter
@@ -21,98 +22,112 @@ Type "clear"
 Enter
 Show
 
-# ─── 1. Help overview ─────────────────────────────────────────────────────────
-Sleep 500ms
-Type "delinea-netconfig --help"
-Enter
-Sleep 3s
-
-Type "clear"
-Enter
+# ─── 1. Check the latest published requirements ───────────────────────────────
 Sleep 300ms
-
-# ─── 2. Info — statistics ─────────────────────────────────────────────────────
-Type "delinea-netconfig info testdata/network-requirements.json"
+Type "# Check what Delinea has published — no file needed"
 Enter
-Sleep 3.5s
-
-Type "clear"
-Enter
-Sleep 300ms
-
-# ─── 3. Info — latest version from setup.delinea.app ─────────────────────────
+Sleep 600ms
 Type "delinea-netconfig info --latest"
+Enter
+Sleep 5s
+
+Type "clear"
+Enter
+Sleep 300ms
+
+# ─── 2. Full statistics — fetched live from setup.delinea.app ─────────────────
+Type "# Full statistics fetched live from setup.delinea.app"
+Enter
+Sleep 600ms
+Type "delinea-netconfig info"
+Enter
+Sleep 5s
+
+Type "clear"
+Enter
+Sleep 300ms
+
+# ─── 3. Convert to CSV — straight from the URL ───────────────────────────────
+Type "# Convert to CSV — straight from setup.delinea.app"
+Enter
+Sleep 600ms
+Type "delinea-netconfig convert -u https://setup.delinea.app/network-requirements --format csv | head -8"
+Enter
+Sleep 6s
+
+Type "clear"
+Enter
+Sleep 300ms
+
+# ─── 4. Convert to Terraform with tenant substitution ────────────────────────
+Type "# Terraform output with your tenant name substituted in"
+Enter
+Sleep 600ms
+Type "delinea-netconfig convert -u https://setup.delinea.app/network-requirements --format terraform --tenant mycompany | head -14"
+Enter
+Sleep 6s
+
+Type "clear"
+Enter
+Sleep 300ms
+
+# ─── 5. Validate the live requirements ───────────────────────────────────────
+Type "# Validate the live requirements"
+Enter
+Sleep 600ms
+Type "delinea-netconfig validate"
+Enter
+Sleep 5s
+
+Type "clear"
+Enter
+Sleep 300ms
+
+# ─── 6. Raw JSON — like curl | jq but built-in ───────────────────────────────
+Type "# Pretty-print the raw JSON — built-in curl | jq"
+Enter
+Sleep 600ms
+Type "delinea-netconfig info --raw | head -20"
+Enter
+Sleep 5s
+
+Type "clear"
+Enter
+Sleep 300ms
+
+# ─── 7. Interactive TUI — defaults to setup.delinea.app ──────────────────────
+Type "# Interactive TUI — no flags needed, loads from setup.delinea.app"
+Enter
+Sleep 600ms
+Type "delinea-netconfig tui"
 Enter
 Sleep 4s
 
-Type "clear"
-Enter
-Sleep 300ms
-
-# ─── 4. Convert — CSV (pipe to head for brevity) ─────────────────────────────
-Type "delinea-netconfig convert -f testdata/network-requirements.json --format csv | head -6"
-Enter
-Sleep 2.5s
-
-Type "clear"
-Enter
-Sleep 300ms
-
-# ─── 5. Convert — Terraform with tenant substitution ─────────────────────────
-Type "delinea-netconfig convert -f testdata/tenant-test.json --format terraform --tenant acme | head -12"
-Enter
-Sleep 2.5s
-
-Type "clear"
-Enter
-Sleep 300ms
-
-# ─── 6. Diff — compare two versions ──────────────────────────────────────────
-Type "delinea-netconfig diff testdata/tenant-test.json testdata/network-requirements.json --summary"
-Enter
-Sleep 3s
-
-Type "clear"
-Enter
-Sleep 300ms
-
-# ─── 7. Validate ─────────────────────────────────────────────────────────────
-Type "delinea-netconfig validate -f testdata/network-requirements.json"
-Enter
-Sleep 2.5s
-
-Type "clear"
-Enter
-Sleep 300ms
-
-# ─── 8. TUI — interactive browser ────────────────────────────────────────────
-Type "delinea-netconfig tui -f testdata/network-requirements.json"
-Enter
-Sleep 2.5s
-
 # Navigate down a few entries
 Down
-Sleep 200ms
+Sleep 250ms
 Down
-Sleep 200ms
+Sleep 250ms
+Down
+Sleep 250ms
 Down
 Sleep 300ms
 
-# Filter by text
+# Live text filter
 Type "/"
 Sleep 400ms
 Type "platform"
-Sleep 1.5s
+Sleep 1.8s
 Escape
 Sleep 500ms
 
-# Open detail view
+# Open entry detail
 Enter
 Sleep 2s
 
-# Go back to browser
+# Back to browser
 Escape
-Sleep 500ms
+Sleep 400ms
 
 # Filter by region
 Type "r"
@@ -121,10 +136,8 @@ Type "us"
 Enter
 Sleep 1.5s
 
-# Clear region filter
+# Clear region filter and quit
 Type "x"
-Sleep 800ms
-
-# Quit
+Sleep 600ms
 Type "q"
 Sleep 500ms
