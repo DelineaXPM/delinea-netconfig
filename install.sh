@@ -1,6 +1,6 @@
 #!/bin/sh
 # Installation script for delinea-netconfig
-# Usage: curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/install.sh | sh
+# Usage: curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-netconfig/main/install.sh | sh
 
 set -e
 
@@ -47,7 +47,7 @@ esac
 
 # Get latest version from GitHub API
 echo "Fetching latest release..."
-API_RESPONSE=$(curl -s https://api.github.com/repos/DelineaLaari/delinea-netconfig/releases/latest)
+API_RESPONSE=$(curl -s https://api.github.com/repos/DelineaXPM/delinea-netconfig/releases/latest)
 LATEST_VERSION=$(echo "$API_RESPONSE" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
 if [ -z "$LATEST_VERSION" ]; then
@@ -62,7 +62,7 @@ if [ -z "$LATEST_VERSION" ]; then
     echo "  - No releases have been published yet"
     echo "  - GitHub API rate limit exceeded (try again in a few minutes)"
     echo ""
-    echo "Manual install: download a release from https://github.com/DelineaLaari/delinea-netconfig/releases"
+    echo "Manual install: download a release from https://github.com/DelineaXPM/delinea-netconfig/releases"
     exit 1
 fi
 
@@ -70,7 +70,7 @@ echo "Latest version: $LATEST_VERSION"
 
 # Construct download URL
 BINARY_NAME="delinea-netconfig_${LATEST_VERSION#v}_${OS}_${ARCH}.tar.gz"
-DOWNLOAD_URL="https://github.com/DelineaLaari/delinea-netconfig/releases/download/${LATEST_VERSION}/${BINARY_NAME}"
+DOWNLOAD_URL="https://github.com/DelineaXPM/delinea-netconfig/releases/download/${LATEST_VERSION}/${BINARY_NAME}"
 
 echo "Downloading from: $DOWNLOAD_URL"
 
