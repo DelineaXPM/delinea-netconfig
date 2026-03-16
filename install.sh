@@ -46,8 +46,14 @@ case "$ARCH" in
 esac
 
 # Get latest version from GitHub API
+# Optional: set GITHUB_TOKEN env var to authenticate (required for private repos,
+# also helps avoid API rate limits)
 echo "Fetching latest release..."
-API_RESPONSE=$(curl -s https://api.github.com/repos/DelineaXPM/delinea-netconfig/releases/latest)
+if [ -n "$GITHUB_TOKEN" ]; then
+    API_RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/DelineaXPM/delinea-netconfig/releases/latest)
+else
+    API_RESPONSE=$(curl -s https://api.github.com/repos/DelineaXPM/delinea-netconfig/releases/latest)
+fi
 LATEST_VERSION=$(echo "$API_RESPONSE" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
 if [ -z "$LATEST_VERSION" ]; then
