@@ -55,9 +55,12 @@ All other platforms: download the archive from [GitHub Releases](https://github.
 ### Docker
 
 ```bash
-docker pull ghcr.io/delineaxpm/delinea-netconfig:latest
+# Fetch live from setup.delinea.app and convert (no local file needed)
+docker run --rm ghcr.io/delineaxpm/delinea-netconfig:latest \
+  convert -u https://setup.delinea.app/network-requirements --format csv
 
-docker run --rm -v $(pwd):/data ghcr.io/delineaxpm/delinea-netconfig:latest \
+# Convert a local file (must exist in current directory)
+docker run --rm -v "$(pwd):/data" ghcr.io/delineaxpm/delinea-netconfig:latest \
   convert -f /data/network-requirements.json --format csv
 ```
 
