@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-03-16
+
+### Fixed
+- Install script now shows detailed error output (raw API response, possible causes) when GitHub API fails to return a version
+- Docker README example updated to use URL-based command by default; local file example moved to secondary with clarifying note
+
 ## [1.7.0] - 2026-03-16
 
 ### Changed
@@ -162,6 +168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker image registry references
 - Repository name references in release config
 
+[1.7.1]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.4.0...v1.5.0
