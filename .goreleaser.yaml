@@ -120,7 +120,7 @@ changelog:
 
 release:
   github:
-    owner: DelineaXPM
+    owner: DelineaLaari
     name: delinea-netconfig
 
   # Release name template
@@ -138,7 +138,7 @@ release:
 
     ### Using Installation Script (Linux/macOS)
     ```bash
-    curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-netconfig/main/install.sh | sh
+    curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/install.sh | sh
     ```
 
     ### Binary Downloads
@@ -147,11 +147,11 @@ release:
     ### Using Docker
     ```bash
     # Fetch live (no local file needed)
-    docker run --rm ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }} \
+    docker run --rm ghcr.io/delinealaari/delinea-netconfig:{{ .Version }} \
       convert -u https://setup.delinea.app/network-requirements --format csv
 
     # Convert a local file (must exist in current directory)
-    docker run --rm -v "$(pwd):/data" ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }} \
+    docker run --rm -v "$(pwd):/data" ghcr.io/delinealaari/delinea-netconfig:{{ .Version }} \
       convert -f /data/network-requirements.json --format csv
     ```
 
@@ -162,13 +162,13 @@ release:
 
     ---
 
-    **Full Changelog**: https://github.com/DelineaXPM/delinea-netconfig/compare/{{ .PreviousTag }}...{{ .Tag }}
+    **Full Changelog**: https://github.com/DelineaLaari/delinea-netconfig/compare/{{ .PreviousTag }}...{{ .Tag }}
 
 # Homebrew tap (disabled - create homebrew-tap repository to enable)
 # # brews:
 #   - name: delinea-netconfig
 #     repository:
-#       owner: DelineaXPM
+#       owner: DelineaLaari
 #       name: homebrew-tap
 # 
 #     # Git author for commits
@@ -199,8 +199,8 @@ release:
 # Docker images
 dockers:
   - image_templates:
-      - "ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-amd64"
-      - "ghcr.io/delineaxpm/delinea-netconfig:latest-amd64"
+      - "ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-amd64"
+      - "ghcr.io/delinealaari/delinea-netconfig:latest-amd64"
     use: buildx
     goos: linux
     goarch: amd64
@@ -212,12 +212,12 @@ dockers:
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.description=Convert Delinea network requirements to various firewall and IaC formats"
-      - "--label=org.opencontainers.image.source=https://github.com/DelineaXPM/delinea-netconfig"
+      - "--label=org.opencontainers.image.source=https://github.com/DelineaLaari/delinea-netconfig"
       - "--label=org.opencontainers.image.licenses=MIT"
 
   - image_templates:
-      - "ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-arm64"
-      - "ghcr.io/delineaxpm/delinea-netconfig:latest-arm64"
+      - "ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-arm64"
+      - "ghcr.io/delinealaari/delinea-netconfig:latest-arm64"
     use: buildx
     goos: linux
     goarch: arm64
@@ -229,20 +229,20 @@ dockers:
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.description=Convert Delinea network requirements to various firewall and IaC formats"
-      - "--label=org.opencontainers.image.source=https://github.com/DelineaXPM/delinea-netconfig"
+      - "--label=org.opencontainers.image.source=https://github.com/DelineaLaari/delinea-netconfig"
       - "--label=org.opencontainers.image.licenses=MIT"
 
 # Docker manifests for multi-arch images
 docker_manifests:
-  - name_template: ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}
+  - name_template: ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}
     image_templates:
-      - ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-amd64
-      - ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-arm64
+      - ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-amd64
+      - ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-arm64
 
-  - name_template: ghcr.io/delineaxpm/delinea-netconfig:latest
+  - name_template: ghcr.io/delinealaari/delinea-netconfig:latest
     image_templates:
-      - ghcr.io/delineaxpm/delinea-netconfig:latest-amd64
-      - ghcr.io/delineaxpm/delinea-netconfig:latest-arm64
+      - ghcr.io/delinealaari/delinea-netconfig:latest-amd64
+      - ghcr.io/delinealaari/delinea-netconfig:latest-arm64
 
 # Announce release
 announce:
