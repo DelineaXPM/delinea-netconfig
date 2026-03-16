@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/parser"
+	"github.com/DelineaXPM/delinea-netconfig/internal/parser"
 )
 
 // ValidationResult contains the results of validating a network requirements JSON

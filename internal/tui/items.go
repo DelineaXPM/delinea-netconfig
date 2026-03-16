@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
+	"github.com/DelineaXPM/delinea-netconfig/pkg/types"
 )
 
 // EntryItem wraps a NetworkEntry to satisfy the bubbles list.Item interface.

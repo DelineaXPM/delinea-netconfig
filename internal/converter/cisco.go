@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
+	"github.com/DelineaXPM/delinea-netconfig/pkg/types"
 )
 
 // CiscoACLConverter converts network entries to Cisco ACL format

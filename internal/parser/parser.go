@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
+	"github.com/DelineaXPM/delinea-netconfig/pkg/types"
 )
 
 // Parse parses the network requirements JSON data

@@ -3,7 +3,7 @@ package parser
 import (
 	"sort"
 
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
+	"github.com/DelineaXPM/delinea-netconfig/pkg/types"
 )
 
 // Normalize converts NetworkRequirements into a flat list of NetworkEntry structs

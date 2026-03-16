@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/tui"
+	"github.com/DelineaXPM/delinea-netconfig/internal/tui"
 )
 
 var (

@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/fetcher"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/validator"
+	"github.com/DelineaXPM/delinea-netconfig/internal/fetcher"
+	"github.com/DelineaXPM/delinea-netconfig/internal/validator"
 	"github.com/spf13/cobra"
 )
 

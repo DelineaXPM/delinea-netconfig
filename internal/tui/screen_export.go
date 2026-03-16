@@ -9,8 +9,8 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/huh"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/converter"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
+	"github.com/DelineaXPM/delinea-netconfig/internal/converter"
+	"github.com/DelineaXPM/delinea-netconfig/pkg/types"
 )
 
 // exportDoneMsg is sent when the export operation completes.

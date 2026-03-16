@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-03-16
+
+### Changed
+- Repository migrated from `DelineaLaari/delinea-netconfig` to `DelineaXPM/delinea-netconfig`
+- Go module path updated from `github.com/DelineaXPM/delinea-platform/delinea-netconfig` to `github.com/DelineaXPM/delinea-netconfig`
+- All documentation, CI/CD, install script, and GoReleaser config updated to reference new repository location
+- Docker images now published to `ghcr.io/delineaxpm/delinea-netconfig`
+- README table of contents added
+
 ## [1.6.0] - 2026-03-13
 
 ### Changed
@@ -92,7 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.5] - 2026-02-11
 
 ### Fixed
-- Install script repository references (updated from DelineaXPM/delinea-platform to DelineaLaari/delinea-netconfig)
+- Install script repository references (updated from DelineaXPM/delinea-platform to DelineaXPM/delinea-netconfig)
 
 ## [1.0.4] - 2026-02-11
 
@@ -153,11 +162,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker image registry references
 - Repository name references in release config
 
-[1.1.1]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.1.0...v1.1.1
-[1.1.0]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.0.5...v1.1.0
-[1.0.5]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.0.4...v1.0.5
-[1.0.4]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.0.3...v1.0.4
-[1.0.3]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.0.2...v1.0.3
-[1.0.2]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.0.1...v1.0.2
-[1.0.1]: https://github.com/DelineaLaari/delinea-netconfig/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/DelineaLaari/delinea-netconfig/releases/tag/v1.0.0
+[1.7.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.6.0...v1.7.0
+[1.6.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.2.1...v1.3.0
+[1.2.1]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.1.2...v1.2.0
+[1.1.2]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.1.0...v1.1.1
+[1.1.0]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.0.5...v1.1.0
+[1.0.5]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.0.4...v1.0.5
+[1.0.4]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.0.3...v1.0.4
+[1.0.3]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/DelineaXPM/delinea-netconfig/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/DelineaXPM/delinea-netconfig/releases/tag/v1.0.0

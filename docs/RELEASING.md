@@ -51,11 +51,11 @@ Releases are fully automated using GoReleaser and GitHub Actions.
    - Push Docker images to GHCR
 
 5. **Verify the release**
-   - Check [GitHub Releases](https://github.com/DelineaXPM/delinea-platform/releases)
+   - Check [GitHub Releases](https://github.com/DelineaXPM/delinea-netconfig/releases)
    - Test installation methods:
      ```bash
      # Test install script
-     curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-platform/main/delinea-netconfig/install.sh | sh
+     curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-netconfig/main/install.sh | sh
 
      # Test Docker image
      docker pull ghcr.io/delineaxpm/delinea-netconfig:v0.4.0
@@ -122,7 +122,7 @@ If a release has issues:
 
 ### Build fails in GitHub Actions
 
-- Check the [Actions tab](https://github.com/DelineaXPM/delinea-platform/actions)
+- Check the [Actions tab](https://github.com/DelineaXPM/delinea-netconfig/actions)
 - Common issues:
   - Tests failing: Fix tests before releasing
   - Docker build failing: Check Dockerfile
@@ -178,4 +178,4 @@ After a successful release:
 
 - **GoReleaser Docs**: https://goreleaser.com
 - **GitHub Actions**: https://docs.github.com/en/actions
-- **Project Issues**: https://github.com/DelineaXPM/delinea-platform/issues
+- **Project Issues**: https://github.com/DelineaXPM/delinea-netconfig/issues

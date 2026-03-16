@@ -7,8 +7,8 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/differ"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
+	"github.com/DelineaXPM/delinea-netconfig/internal/differ"
+	"github.com/DelineaXPM/delinea-netconfig/pkg/types"
 )
 
 // diffTab represents which subset of diff results is shown.

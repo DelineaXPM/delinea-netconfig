@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/cli"
+	"github.com/DelineaXPM/delinea-netconfig/internal/cli"
 )
 
 func main() {

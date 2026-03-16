@@ -53,9 +53,9 @@ builds:
     # Inject version information at build time
     ldflags:
       - -s -w
-      - -X github.com/DelineaLaari/delinea-netconfig/internal/cli.Version={{.Version}}
-      - -X github.com/DelineaLaari/delinea-netconfig/internal/cli.Commit={{.Commit}}
-      - -X github.com/DelineaLaari/delinea-netconfig/internal/cli.Date={{.Date}}
+      - -X github.com/DelineaXPM/delinea-netconfig/internal/cli.Version={{.Version}}
+      - -X github.com/DelineaXPM/delinea-netconfig/internal/cli.Commit={{.Commit}}
+      - -X github.com/DelineaXPM/delinea-netconfig/internal/cli.Date={{.Date}}
 
     env:
       - CGO_ENABLED=0
@@ -120,7 +120,7 @@ changelog:
 
 release:
   github:
-    owner: DelineaLaari
+    owner: DelineaXPM
     name: delinea-netconfig
 
   # Release name template
@@ -138,7 +138,7 @@ release:
 
     ### Using Installation Script (Linux/macOS)
     ```bash
-    curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/install.sh | sh
+    curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-netconfig/main/install.sh | sh
     ```
 
     ### Binary Downloads
@@ -146,10 +146,10 @@ release:
 
     ### Using Docker
     ```bash
-    docker pull ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}
+    docker pull ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}
 
     # Run with local files
-    docker run --rm -v "$(pwd):/data" ghcr.io/delinealaari/delinea-netconfig:{{ .Version }} convert -f /data/network-requirements.json --format csv
+    docker run --rm -v "$(pwd):/data" ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }} convert -f /data/network-requirements.json --format csv
     ```
 
     ### Verify Installation
@@ -159,13 +159,13 @@ release:
 
     ---
 
-    **Full Changelog**: https://github.com/DelineaLaari/delinea-netconfig/compare/{{ .PreviousTag }}...{{ .Tag }}
+    **Full Changelog**: https://github.com/DelineaXPM/delinea-netconfig/compare/{{ .PreviousTag }}...{{ .Tag }}
 
 # Homebrew tap (disabled - create homebrew-tap repository to enable)
 # # brews:
 #   - name: delinea-netconfig
 #     repository:
-#       owner: DelineaLaari
+#       owner: DelineaXPM
 #       name: homebrew-tap
 # 
 #     # Git author for commits
@@ -176,7 +176,7 @@ release:
 #     # Folder inside repository
 #     directory: Formula
 # 
-#     homepage: https://github.com/DelineaLaari/delinea-netconfig/tree/main/delinea-netconfig
+#     homepage: https://github.com/DelineaXPM/delinea-netconfig/tree/main/delinea-netconfig
 #     description: "Convert Delinea network requirements to various firewall and IaC formats"
 #     license: "MIT"
 # 
@@ -196,8 +196,8 @@ release:
 # Docker images
 dockers:
   - image_templates:
-      - "ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-amd64"
-      - "ghcr.io/delinealaari/delinea-netconfig:latest-amd64"
+      - "ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-amd64"
+      - "ghcr.io/delineaxpm/delinea-netconfig:latest-amd64"
     use: buildx
     goos: linux
     goarch: amd64
@@ -209,12 +209,12 @@ dockers:
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.description=Convert Delinea network requirements to various firewall and IaC formats"
-      - "--label=org.opencontainers.image.source=https://github.com/DelineaLaari/delinea-netconfig"
+      - "--label=org.opencontainers.image.source=https://github.com/DelineaXPM/delinea-netconfig"
       - "--label=org.opencontainers.image.licenses=MIT"
 
   - image_templates:
-      - "ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-arm64"
-      - "ghcr.io/delinealaari/delinea-netconfig:latest-arm64"
+      - "ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-arm64"
+      - "ghcr.io/delineaxpm/delinea-netconfig:latest-arm64"
     use: buildx
     goos: linux
     goarch: arm64
@@ -226,20 +226,20 @@ dockers:
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.description=Convert Delinea network requirements to various firewall and IaC formats"
-      - "--label=org.opencontainers.image.source=https://github.com/DelineaLaari/delinea-netconfig"
+      - "--label=org.opencontainers.image.source=https://github.com/DelineaXPM/delinea-netconfig"
       - "--label=org.opencontainers.image.licenses=MIT"
 
 # Docker manifests for multi-arch images
 docker_manifests:
-  - name_template: ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}
+  - name_template: ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}
     image_templates:
-      - ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-amd64
-      - ghcr.io/delinealaari/delinea-netconfig:{{ .Version }}-arm64
+      - ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-amd64
+      - ghcr.io/delineaxpm/delinea-netconfig:{{ .Version }}-arm64
 
-  - name_template: ghcr.io/delinealaari/delinea-netconfig:latest
+  - name_template: ghcr.io/delineaxpm/delinea-netconfig:latest
     image_templates:
-      - ghcr.io/delinealaari/delinea-netconfig:latest-amd64
-      - ghcr.io/delinealaari/delinea-netconfig:latest-arm64
+      - ghcr.io/delineaxpm/delinea-netconfig:latest-amd64
+      - ghcr.io/delineaxpm/delinea-netconfig:latest-arm64
 
 # Announce release
 announce:

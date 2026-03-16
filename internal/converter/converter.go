@@ -3,7 +3,7 @@ package converter
 import (
 	"fmt"
 
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
+	"github.com/DelineaXPM/delinea-netconfig/pkg/types"
 )
 
 // Converter is the interface that all format converters must implement

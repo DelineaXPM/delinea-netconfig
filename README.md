@@ -1,12 +1,29 @@
 # Delinea Network Requirements Converter
 
-[![CI](https://github.com/DelineaLaari/delinea-netconfig/workflows/CI/badge.svg)](https://github.com/DelineaLaari/delinea-netconfig/actions)
+[![CI](https://github.com/DelineaXPM/delinea-netconfig/workflows/CI/badge.svg)](https://github.com/DelineaXPM/delinea-netconfig/actions)
 [![Go Version](https://img.shields.io/badge/Go-1.23%2B-blue.svg)](https://go.dev)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 Convert Delinea's Platform IP/CIDR network requirements JSON into firewall rules and infrastructure-as-code formats — via CLI or an interactive terminal UI.
 
 ![delinea-netconfig demo](demo/demo.gif)
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Interactive TUI](#interactive-tui)
+- [Commands](#commands)
+- [Tenant Substitution](#tenant-substitution)
+- [Output Formats](#output-formats)
+- [Diff](#diff)
+- [Info](#info)
+- [Shell Completion](#shell-completion)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
+- [Disclaimer](#disclaimer)
 
 ## Features
 
@@ -24,36 +41,36 @@ Convert Delinea's Platform IP/CIDR network requirements JSON into firewall rules
 **Linux / macOS**
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/install.sh | sh
+curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-netconfig/main/install.sh | sh
 ```
 
 **Windows**
 
-Download the `.zip` for your architecture from [GitHub Releases](https://github.com/DelineaLaari/delinea-netconfig/releases), extract `delinea-netconfig.exe`, and add it to your PATH.
+Download the `.zip` for your architecture from [GitHub Releases](https://github.com/DelineaXPM/delinea-netconfig/releases), extract `delinea-netconfig.exe`, and add it to your PATH.
 
 > **Tip:** The interactive `tui` command requires a modern terminal. Use [Windows Terminal](https://aka.ms/terminal) for the best experience — the classic `cmd.exe` console has limited support.
 
-All other platforms: download the archive from [GitHub Releases](https://github.com/DelineaLaari/delinea-netconfig/releases), extract, and move to your PATH.
+All other platforms: download the archive from [GitHub Releases](https://github.com/DelineaXPM/delinea-netconfig/releases), extract, and move to your PATH.
 
 ### Docker
 
 ```bash
-docker pull ghcr.io/delinealaari/delinea-netconfig:latest
+docker pull ghcr.io/delineaxpm/delinea-netconfig:latest
 
-docker run --rm -v $(pwd):/data ghcr.io/delinealaari/delinea-netconfig:latest \
+docker run --rm -v $(pwd):/data ghcr.io/delineaxpm/delinea-netconfig:latest \
   convert -f /data/network-requirements.json --format csv
 ```
 
 ### Go Install
 
 ```bash
-go install github.com/DelineaLaari/delinea-netconfig/cmd/delinea-netconfig@latest
+go install github.com/DelineaXPM/delinea-netconfig/cmd/delinea-netconfig@latest
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/DelineaLaari/delinea-netconfig.git
+git clone https://github.com/DelineaXPM/delinea-netconfig.git
 cd delinea-netconfig
 make build
 ```
@@ -316,7 +333,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install delinea-netconfig
-        run: curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/install.sh | sh
+        run: curl -sfL https://raw.githubusercontent.com/DelineaXPM/delinea-netconfig/main/install.sh | sh
 
       - name: Fetch and convert
         run: |

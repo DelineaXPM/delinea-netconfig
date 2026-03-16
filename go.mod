@@ -1,4 +1,4 @@
-module github.com/DelineaXPM/delinea-platform/delinea-netconfig
+module github.com/DelineaXPM/delinea-netconfig
 
 go 1.23
 

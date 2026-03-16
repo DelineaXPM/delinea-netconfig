@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/fetcher"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/internal/parser"
-	"github.com/DelineaXPM/delinea-platform/delinea-netconfig/pkg/types"
+	"github.com/DelineaXPM/delinea-netconfig/internal/fetcher"
+	"github.com/DelineaXPM/delinea-netconfig/internal/parser"
+	"github.com/DelineaXPM/delinea-netconfig/pkg/types"
 )
 
 // screen represents which UI screen is currently active.
