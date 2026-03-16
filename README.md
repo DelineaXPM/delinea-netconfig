@@ -21,12 +21,19 @@ Convert Delinea's Platform IP/CIDR network requirements JSON into firewall rules
 
 ### Pre-built Binaries (Recommended)
 
+**Linux / macOS**
+
 ```bash
-# Linux / macOS
 curl -sfL https://raw.githubusercontent.com/DelineaLaari/delinea-netconfig/main/install.sh | sh
 ```
 
-Or download the archive for your platform from [GitHub Releases](https://github.com/DelineaLaari/delinea-netconfig/releases), extract, and move to your PATH.
+**Windows**
+
+Download the `.zip` for your architecture from [GitHub Releases](https://github.com/DelineaLaari/delinea-netconfig/releases), extract `delinea-netconfig.exe`, and add it to your PATH.
+
+> **Tip:** The interactive `tui` command requires a modern terminal. Use [Windows Terminal](https://aka.ms/terminal) for the best experience — the classic `cmd.exe` console has limited support.
+
+All other platforms: download the archive from [GitHub Releases](https://github.com/DelineaLaari/delinea-netconfig/releases), extract, and move to your PATH.
 
 ### Docker
 
