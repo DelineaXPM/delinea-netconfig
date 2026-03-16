@@ -47,10 +47,22 @@ esac
 
 # Get latest version from GitHub API
 echo "Fetching latest release..."
-LATEST_VERSION=$(curl -s https://api.github.com/repos/DelineaXPM/delinea-netconfig/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+API_RESPONSE=$(curl -s https://api.github.com/repos/DelineaXPM/delinea-netconfig/releases/latest)
+LATEST_VERSION=$(echo "$API_RESPONSE" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
 if [ -z "$LATEST_VERSION" ]; then
-    echo "Failed to fetch latest version"
+    echo ""
+    echo "Error: Failed to fetch latest version from GitHub API."
+    echo ""
+    echo "API response was:"
+    echo "$API_RESPONSE" | head -5
+    echo ""
+    echo "Possible causes:"
+    echo "  - The repository may not be publicly accessible"
+    echo "  - No releases have been published yet"
+    echo "  - GitHub API rate limit exceeded (try again in a few minutes)"
+    echo ""
+    echo "Manual install: download a release from https://github.com/DelineaXPM/delinea-netconfig/releases"
     exit 1
 fi
 
