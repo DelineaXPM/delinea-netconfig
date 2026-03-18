@@ -13,9 +13,7 @@ Only the latest release of delinea-netconfig receives security fixes.
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-To report a vulnerability, use [GitHub's private security advisory feature](https://github.com/DelineaXPM/delinea-netconfig/security/advisories/new).
-
-Alternatively, you may email **[security@delinea.com]** with the subject line `[delinea-netconfig] Security Vulnerability`.
+To report a vulnerability, email **[security@delinea.com]** with the subject line `[delinea-netconfig] Security Vulnerability`.
 
 Please include as much of the following as possible:
 
