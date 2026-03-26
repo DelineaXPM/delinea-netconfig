@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.21
 
 # Install ca-certificates for HTTPS support
 RUN apk --no-cache add ca-certificates

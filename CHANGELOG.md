@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SHA256 checksum verification in install script before extracting downloaded binary
 - `SECURITY.md` with vulnerability reporting instructions
 
+### Changed
+- Pin Docker base image from `alpine:latest` to `alpine:3.21` for reproducible builds
+
 ## [1.7.1] - 2026-03-16
 
 ### Fixed
