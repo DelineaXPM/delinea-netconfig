@@ -90,6 +90,41 @@ else
     exit 1
 fi
 
+# Download checksums
+CHECKSUMS_URL="https://github.com/DelineaXPM/delinea-netconfig/releases/download/${LATEST_VERSION}/checksums.txt"
+echo "Verifying checksum..."
+if command -v curl >/dev/null 2>&1; then
+    curl -sLO "$CHECKSUMS_URL"
+elif command -v wget >/dev/null 2>&1; then
+    wget -q "$CHECKSUMS_URL"
+fi
+
+# Verify checksum
+EXPECTED_HASH=$(grep "$BINARY_NAME" checksums.txt | awk '{print $1}')
+if [ -z "$EXPECTED_HASH" ]; then
+    echo "Error: Could not find checksum for $BINARY_NAME in checksums.txt"
+    exit 1
+fi
+
+if command -v sha256sum >/dev/null 2>&1; then
+    ACTUAL_HASH=$(sha256sum "$BINARY_NAME" | awk '{print $1}')
+elif command -v shasum >/dev/null 2>&1; then
+    ACTUAL_HASH=$(shasum -a 256 "$BINARY_NAME" | awk '{print $1}')
+else
+    echo "Warning: No SHA256 tool found, skipping checksum verification"
+    ACTUAL_HASH="$EXPECTED_HASH"
+fi
+
+if [ "$ACTUAL_HASH" != "$EXPECTED_HASH" ]; then
+    echo "Error: Checksum verification failed!"
+    echo "  Expected: $EXPECTED_HASH"
+    echo "  Actual:   $ACTUAL_HASH"
+    echo "The downloaded file may be corrupted or tampered with."
+    exit 1
+fi
+
+echo "Checksum verified: OK"
+
 # Extract
 tar -xzf "$BINARY_NAME"
 
