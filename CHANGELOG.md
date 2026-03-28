@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-03-28
+
 ### Added
 - Trivy security scanning in CI pipeline (dependency vulnerabilities + secret detection on every PR/push)
 - One-time git history secrets audit workflow (`secrets-audit.yml`) using Trivy
