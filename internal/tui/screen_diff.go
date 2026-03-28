@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/DelineaXPM/delinea-netconfig/internal/differ"
 	"github.com/DelineaXPM/delinea-netconfig/pkg/types"
 )
@@ -25,27 +26,31 @@ var diffTabLabels = []string{"All", "Added", "Removed", "Modified"}
 
 // DiffModel shows a tabbed diff view between two network requirements files.
 type DiffModel struct {
-	result     differ.DiffResult
-	activeTab  diffTab
-	viewport   viewport.Model
-	file1Label string
-	file2Label string
-	width      int
-	height     int
+	result       differ.DiffResult
+	activeTab    diffTab
+	viewport     viewport.Model
+	file1Label   string
+	file2Label   string
+	callerScreen screen
+	readyForBack bool
+	width        int
+	height       int
 }
 
 // NewDiffModel creates a DiffModel from two sets of entries.
+// caller is the screen to return to when pressing Esc; use -1 for top-level (quit on Esc).
 func NewDiffModel(old, new []types.NetworkEntry, file1Label, file2Label string, width, height int) DiffModel {
 	result := differ.Compare(old, new)
 	vp := viewport.New(width, height-6)
 	m := DiffModel{
-		result:     result,
-		activeTab:  diffTabAll,
-		viewport:   vp,
-		file1Label: file1Label,
-		file2Label: file2Label,
-		width:      width,
-		height:     height,
+		result:       result,
+		activeTab:    diffTabAll,
+		viewport:     vp,
+		file1Label:   file1Label,
+		file2Label:   file2Label,
+		callerScreen: -1,
+		width:        width,
+		height:       height,
 	}
 	vp.SetContent(renderDiffContent(result, diffTabAll))
 	m.viewport = vp
@@ -57,9 +62,15 @@ func (m DiffModel) Init() tea.Cmd {
 }
 
 func (m DiffModel) Update(msg tea.Msg) (DiffModel, tea.Cmd) {
+	m.readyForBack = false
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case key.Matches(msg, diffKeys.Back):
+			if m.callerScreen >= 0 {
+				m.readyForBack = true
+				return m, nil
+			}
 		case key.Matches(msg, diffKeys.NextTab):
 			m.activeTab = (m.activeTab + 1) % 4
 			m.viewport.SetContent(renderDiffContent(m.result, m.activeTab))
@@ -90,12 +101,16 @@ func (m DiffModel) View() string {
 		styleStatusBar.Render(m.file1Label+" → "+m.file2Label)
 
 	// Tab bar
-	tabBar := ""
+	var tabParts []string
 	for i, label := range diffTabLabels {
 		count := m.tabCount(diffTab(i))
 		fullLabel := fmt.Sprintf("%s (%d)", label, count)
-		tabBar += tabLabel(fullLabel, diffTab(i) == m.activeTab) + "  "
+		tabParts = append(tabParts, tabLabel(fullLabel, diffTab(i) == m.activeTab))
+		if i < len(diffTabLabels)-1 {
+			tabParts = append(tabParts, "  ")
+		}
 	}
+	tabBar := lipgloss.JoinHorizontal(lipgloss.Bottom, tabParts...)
 
 	// Summary line
 	summary := styleStatusBar.Render(fmt.Sprintf(
@@ -105,7 +120,12 @@ func (m DiffModel) View() string {
 		styleDiffModified.Render(fmt.Sprintf("~%d modified", len(m.result.Modified))),
 	))
 
-	help := helpLine(diffKeys.NextTab, diffKeys.Up, diffKeys.Down, diffKeys.Quit)
+	var help string
+	if m.callerScreen >= 0 {
+		help = helpLine(diffKeys.NextTab, diffKeys.Up, diffKeys.Down, diffKeys.Back, diffKeys.Quit)
+	} else {
+		help = helpLine(diffKeys.NextTab, diffKeys.Up, diffKeys.Down, diffKeys.Quit)
+	}
 
 	return fmt.Sprintf("%s\n%s\n%s\n%s\n%s",
 		header,

@@ -33,6 +33,7 @@ type BrowserModel struct {
 	height            int
 	readyForDetail    bool
 	readyForExport    bool
+	readyForDiff      bool
 }
 
 // NewBrowserModel creates a new BrowserModel from a slice of entries.
@@ -72,6 +73,7 @@ func (m BrowserModel) Init() tea.Cmd {
 func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 	m.readyForDetail = false
 	m.readyForExport = false
+	m.readyForDiff = false
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -109,6 +111,9 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 		case key.Matches(msg, browserKeys.Export):
 			m.readyForExport = true
 			return m, nil
+		case key.Matches(msg, browserKeys.Diff):
+			m.readyForDiff = true
+			return m, nil
 		case key.Matches(msg, browserKeys.Tab):
 			m.activeTab = (m.activeTab + 1) % 3
 			m.applyFilters()
@@ -142,10 +147,7 @@ func (m BrowserModel) View() string {
 		tabLabel("Outbound", m.activeTab == dirTabOutbound),
 		tabLabel("Inbound", m.activeTab == dirTabInbound),
 	}
-	tabBar := ""
-	for _, t := range tabs {
-		tabBar += t + "  "
-	}
+	tabBar := lipgloss.JoinHorizontal(lipgloss.Bottom, tabs[0], "  ", tabs[1], "  ", tabs[2])
 
 	// Region filter line
 	regionLine := ""
@@ -159,7 +161,7 @@ func (m BrowserModel) View() string {
 	}
 
 	// Help bar
-	help := helpLine(browserKeys.Up, browserKeys.Down, browserKeys.Detail, browserKeys.Export, browserKeys.Tab, browserKeys.RegionFilter, browserKeys.Quit)
+	help := helpLine(browserKeys.Up, browserKeys.Down, browserKeys.Detail, browserKeys.Export, browserKeys.Diff, browserKeys.Tab, browserKeys.RegionFilter, browserKeys.Quit)
 
 	return fmt.Sprintf("%s\n%s%s\n%s", tabBar, regionLine, m.list.View(), styleStatusBar.Render(help))
 }

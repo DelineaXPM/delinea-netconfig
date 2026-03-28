@@ -8,6 +8,7 @@ type browserKeyMap struct {
 	Down         key.Binding
 	Detail       key.Binding
 	Export       key.Binding
+	Diff         key.Binding
 	Tab          key.Binding
 	RegionFilter key.Binding
 	ClearRegion  key.Binding
@@ -29,6 +30,7 @@ type diffKeyMap struct {
 	PrevTab key.Binding
 	Up      key.Binding
 	Down    key.Binding
+	Back    key.Binding
 	Quit    key.Binding
 }
 
@@ -48,6 +50,10 @@ var browserKeys = browserKeyMap{
 	Export: key.NewBinding(
 		key.WithKeys("e"),
 		key.WithHelp("e", "export"),
+	),
+	Diff: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "diff"),
 	),
 	Tab: key.NewBinding(
 		key.WithKeys("tab"),
@@ -107,8 +113,12 @@ var diffKeys = diffKeyMap{
 		key.WithKeys("down", "j"),
 		key.WithHelp("↓/j", "scroll down"),
 	),
+	Back: key.NewBinding(
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "back"),
+	),
 	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c", "esc"),
+		key.WithKeys("q", "ctrl+c"),
 		key.WithHelp("q", "quit"),
 	),
 }

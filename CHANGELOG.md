@@ -12,9 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - One-time git history secrets audit workflow (`secrets-audit.yml`) using Trivy
 - SHA256 checksum verification in install script before extracting downloaded binary
 - `SECURITY.md` with vulnerability reporting instructions
+- TUI: In-app diff — press `d` in browser to pick a second file and compare versions without restarting
+- TUI: Esc cancels the export form and returns to the previous screen
+- TUI: Export filename extension auto-updates when changing the output format
 
 ### Changed
 - Pin Docker base image from `alpine:latest` to `alpine:3.21` for reproducible builds
+
+### Fixed
+- TUI: Tab bar alignment — All/Outbound/Inbound tabs now render side by side (not stacked) with consistent underline height
 
 ## [1.7.1] - 2026-03-16
 

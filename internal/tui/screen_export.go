@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/huh"
 	tea "github.com/charmbracelet/bubbletea"
@@ -34,6 +35,7 @@ type ExportModel struct {
 
 	// Form-bound values
 	fFormat     string
+	prevFormat  string
 	fTenant     string
 	fRegion     string
 	fOutputFile string
@@ -60,6 +62,7 @@ func NewExportModel(
 		filteredEntries: filtered,
 		serviceEntry:    service,
 		fFormat:         "csv",
+		prevFormat:      "csv",
 		fScope:          scopeAll,
 	}
 
@@ -126,7 +129,11 @@ func NewExportModel(
 					return nil
 				}),
 		),
-	).WithWidth(width).WithHeight(height - 4)
+	)
+
+	km := huh.NewDefaultKeyMap()
+	km.Quit = key.NewBinding(key.WithKeys("ctrl+c", "esc"))
+	form = form.WithWidth(width).WithHeight(height - 4).WithKeyMap(km)
 
 	m.form = form
 
@@ -137,13 +144,18 @@ func NewExportModel(
 	return m
 }
 
-// formatExt returns the file extension for the current format selection.
-func (m ExportModel) formatExt() string {
-	conv, err := converter.GetConverter(m.fFormat)
+// extForFormat returns the file extension for a given format string.
+func (m ExportModel) extForFormat(format string) string {
+	conv, err := converter.GetConverter(format)
 	if err != nil {
 		return "txt"
 	}
 	return conv.FileExtension()
+}
+
+// formatExt returns the file extension for the current format selection.
+func (m ExportModel) formatExt() string {
+	return m.extForFormat(m.fFormat)
 }
 
 func (m ExportModel) Init() tea.Cmd {
@@ -181,6 +193,16 @@ func (m ExportModel) Update(msg tea.Msg) (ExportModel, tea.Cmd) {
 		m.form = f
 	}
 
+	// Auto-update file extension when format changes
+	if m.fFormat != m.prevFormat {
+		oldExt := m.extForFormat(m.prevFormat)
+		newExt := m.extForFormat(m.fFormat)
+		if strings.HasSuffix(m.fOutputFile, "."+oldExt) {
+			m.fOutputFile = strings.TrimSuffix(m.fOutputFile, "."+oldExt) + "." + newExt
+		}
+		m.prevFormat = m.fFormat
+	}
+
 	// Check if form is completed
 	if m.form.State == huh.StateCompleted {
 		m.exporting = true
@@ -208,7 +230,8 @@ func (m ExportModel) View() string {
 		help := styleHelp.Render("press any key to continue")
 		return fmt.Sprintf("\n  %s\n\n  %s\n", m.statusMsg, help)
 	}
-	return m.form.View()
+	hint := styleHelp.Render("esc: cancel")
+	return m.form.View() + "\n" + hint
 }
 
 // doExport performs the actual export as a tea.Cmd (runs in goroutine).

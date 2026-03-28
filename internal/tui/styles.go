@@ -37,11 +37,19 @@ var (
 			Foreground(colorHighlight).
 			BorderStyle(lipgloss.NormalBorder()).
 			BorderBottom(true).
+			BorderTop(false).
+			BorderLeft(false).
+			BorderRight(false).
 			BorderForeground(colorPrimary).
 			Padding(0, 1)
 
 	styleTabInactive = lipgloss.NewStyle().
 				Foreground(colorMuted).
+				BorderStyle(lipgloss.HiddenBorder()).
+				BorderBottom(true).
+				BorderTop(false).
+				BorderLeft(false).
+				BorderRight(false).
 				Padding(0, 1)
 
 	// Direction badges

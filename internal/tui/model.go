@@ -18,6 +18,7 @@ const (
 	screenDetail
 	screenExport
 	screenDiff
+	screenDiffPicker
 )
 
 // Config holds the startup configuration passed from the CLI command.
@@ -40,6 +41,7 @@ type AppModel struct {
 	detail     DetailModel
 	export     ExportModel
 	diff       DiffModel
+	diffPicker FilePickerModel
 
 	// Shared state
 	entries     []types.NetworkEntry
@@ -145,6 +147,8 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.detail, _ = m.detail.Update(msg)
 		case screenDiff:
 			m.diff, _ = m.diff.Update(msg)
+		case screenDiffPicker:
+			m.diffPicker, _ = m.diffPicker.Update(msg)
 		}
 		return m, nil
 
@@ -152,7 +156,7 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
-		if msg.String() == "q" && m.currentScreen != screenExport {
+		if msg.String() == "q" && m.currentScreen != screenExport && m.currentScreen != screenDiffPicker {
 			return m, tea.Quit
 		}
 	}
@@ -169,6 +173,8 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateExport(msg)
 	case screenDiff:
 		return m.updateDiff(msg)
+	case screenDiffPicker:
+		return m.updateDiffPicker(msg)
 	}
 
 	return m, nil
@@ -195,6 +201,8 @@ func (m AppModel) View() string {
 		return m.export.View()
 	case screenDiff:
 		return m.diff.View()
+	case screenDiffPicker:
+		return m.diffPicker.View()
 	}
 
 	return ""
@@ -247,6 +255,12 @@ func (m AppModel) updateBrowser(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.currentScreen = screenDetail
 			return m, m.detail.Init()
 		}
+	}
+
+	if m.browser.readyForDiff {
+		m.diffPicker = NewFilePickerModel(m.width, m.height)
+		m.currentScreen = screenDiffPicker
+		return m, m.diffPicker.Init()
 	}
 
 	if m.browser.readyForExport {
@@ -313,6 +327,40 @@ func (m AppModel) updateExport(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m AppModel) updateDiff(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.diff, cmd = m.diff.Update(msg)
+
+	if m.diff.readyForBack && m.diff.callerScreen >= 0 {
+		m.currentScreen = m.diff.callerScreen
+		return m, nil
+	}
+
+	return m, cmd
+}
+
+func (m AppModel) updateDiffPicker(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Esc returns to browser
+	if kmsg, ok := msg.(tea.KeyMsg); ok {
+		if kmsg.String() == "esc" || kmsg.String() == "q" {
+			m.currentScreen = screenBrowser
+			return m, nil
+		}
+	}
+
+	var cmd tea.Cmd
+	m.diffPicker, cmd = m.diffPicker.Update(msg)
+
+	if m.diffPicker.selected != "" {
+		path := m.diffPicker.selected
+		newEntries, _, err := loadFile(path)
+		if err != nil {
+			m.err = err
+			return m, tea.Quit
+		}
+		m.diff = NewDiffModel(m.entries, newEntries, m.sourceLabel, path, m.width, m.height)
+		m.diff.callerScreen = screenBrowser
+		m.currentScreen = screenDiff
+		return m, m.diff.Init()
+	}
+
 	return m, cmd
 }
 
