@@ -127,7 +127,9 @@ delinea-netconfig tui --diff old.json new.json
 | `x` | Clear region filter |
 | `Enter` | Open entry detail |
 | `e` | Export (from browser or detail) |
+| `d` | Diff current file against another file |
 | `c` | Copy IPs to clipboard (detail screen) |
+| `Esc` | Cancel export / go back from diff or detail |
 | `Tab` | Cycle diff tabs: All / Added / Removed / Modified |
 | `q` / `Ctrl+C` | Quit |
 
