@@ -89,7 +89,7 @@ func TestCSVConverter_Convert(t *testing.T) {
 			},
 			expectedRows: 2,
 			checkContent: func(t *testing.T, rows [][]string) {
-				assert.Equal(t, "443,8443,53,123", rows[1][6])
+				assert.Equal(t, "443;8443;53;123", rows[1][6])
 				assert.Equal(t, "both", rows[1][5])
 			},
 		},
@@ -250,7 +250,7 @@ func TestFormatPorts(t *testing.T) {
 		{
 			name:     "multiple ports",
 			ports:    []int{443, 8443, 80},
-			expected: "443,8443,80",
+			expected: "443;8443;80",
 		},
 		{
 			name:     "empty ports",
@@ -315,7 +315,7 @@ func TestCSVConverter_Integration(t *testing.T) {
 	assert.Equal(t, "outbound", rows[1][0])
 	assert.Equal(t, "platform", rows[1][1])
 	assert.Equal(t, "api.example.com", rows[1][4])
-	assert.Equal(t, "443,8443", rows[1][6])
+	assert.Equal(t, "443;8443", rows[1][6])
 
 	// Verify second data row (second value from first entry)
 	assert.Equal(t, "app.example.com", rows[2][4])

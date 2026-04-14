@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- CSV converter: use semicolon separator for multi-port values to prevent Excel from misinterpreting as numbers
+
 ## [1.8.0] - 2026-03-28
 
 ### Added

@@ -74,5 +74,5 @@ func formatPorts(ports []int) string {
 	for i, port := range ports {
 		portStrs[i] = strconv.Itoa(port)
 	}
-	return strings.Join(portStrs, ",")
+	return strings.Join(portStrs, ";")
 }
