@@ -19,6 +19,7 @@ Convert Delinea's Platform IP/CIDR network requirements JSON into firewall rules
 - [Output Formats](#output-formats)
 - [Diff](#diff)
 - [Info](#info)
+- [Connectivity Check](#connectivity-check)
 - [Shell Completion](#shell-completion)
 - [Examples](#examples)
 - [Contributing](#contributing)
@@ -140,6 +141,7 @@ delinea-netconfig tui --diff old.json new.json
 | `tui` | Interactive terminal UI |
 | `convert` | Convert to a supported output format |
 | `validate` | Validate network requirements JSON |
+| `check` | Probe DNS / TCP / TLS connectivity to the endpoints |
 | `diff` | Compare two versions |
 | `info` | Show statistics |
 | `completion` | Generate shell completion scripts |
@@ -260,6 +262,41 @@ delinea-netconfig info network-requirements.json
 ```
 
 Shows total entries, direction breakdown, service distribution, protocol usage, and port frequency.
+
+## Connectivity Check
+
+```bash
+# Probe every published endpoint from the default URL
+delinea-netconfig check
+
+# Limit to one region
+delinea-netconfig check -f network-requirements.json --region eu
+
+# Limit to one service (matches the JSON `id` field)
+delinea-netconfig check --service platform_engine_messaging
+
+# Substitute the <tenant> placeholder before probing
+delinea-netconfig check --tenant mycompany --region us
+```
+
+For each unique hostname or IP the command runs three probes:
+
+1. **DNS resolution** (hostnames only — IP literals are skipped).
+2. **TCP dial** against every port declared for the service.
+3. **TLS handshake** on TLS-typical ports (443, 5671, 8883, 636, 993, 995, 465, 5986, 8443) when the target is a hostname (so the SNI matches the certificate). Use `--insecure` to report handshake reachability without certificate validation — useful behind SSL-inspecting proxies.
+
+CIDR ranges and values still containing `<tenant>` are skipped automatically. The process exits non-zero when any probe fails, so the command is safe to use in firewall-validation scripts and CI pipelines.
+
+Common flags:
+
+```
+--region       Limit to global + one region
+--service      Limit to a single service id
+--tenant       Substitute <tenant> in hostnames before probing
+--timeout      Per-probe timeout (default 5s)
+--concurrency  Parallel probes (default 10)
+--insecure     Skip TLS certificate validation
+```
 
 ## Shell Completion
 
