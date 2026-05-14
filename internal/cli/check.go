@@ -2,10 +2,14 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"os"
+	"os/signal"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/DelineaXPM/delinea-netconfig/internal/connchk"
@@ -25,6 +29,11 @@ var (
 	checkConcurrency   int
 	checkInsecure      bool
 )
+
+// ErrProbesFailed is returned by `check` when any probe (DNS, TCP, or TLS)
+// failed. main.go translates this into a non-zero exit code without dumping
+// the cobra usage screen.
+var ErrProbesFailed = errors.New("one or more connectivity probes failed")
 
 var checkCmd = &cobra.Command{
 	Use:   "check",
@@ -57,6 +66,10 @@ Examples:
   # Tighten the timeout and increase parallelism on a fast network
   delinea-netconfig check --timeout 3s --concurrency 20`,
 	RunE: runCheck,
+	// Runtime failures (probes failing, malformed flags) shouldn't dump the
+	// cobra usage screen on top of an already-rendered report. The one-line
+	// "Error: ..." that cobra prints after RunE returns is enough.
+	SilenceUsage: true,
 }
 
 func init() {
@@ -75,6 +88,13 @@ func init() {
 }
 
 func runCheck(cmd *cobra.Command, args []string) error {
+	if checkTimeout <= 0 {
+		return fmt.Errorf("--timeout must be > 0 (got %s)", checkTimeout)
+	}
+	if checkConcurrency <= 0 {
+		return fmt.Errorf("--concurrency must be > 0 (got %d)", checkConcurrency)
+	}
+
 	logVerbose("Starting connectivity check")
 
 	data, source, err := loadCheckInput()
@@ -117,26 +137,41 @@ func runCheck(cmd *cobra.Command, args []string) error {
 		InsecureSkipVerify: checkInsecure,
 	}
 
-	fmt.Printf("=== Connectivity Check ===\n")
-	fmt.Printf("Source:     %s\n", source)
-	fmt.Printf("Targets:    deriving from %d entries...\n", len(entries))
-	fmt.Printf("Timeout:    %s   Concurrency: %d   Insecure TLS: %v\n\n",
+	out := cmd.OutOrStdout()
+	errOut := cmd.ErrOrStderr()
+
+	if opts.InsecureSkipVerify {
+		fmt.Fprintln(errOut, "WARNING: --insecure disables TLS certificate validation — handshakes will appear OK even against an SSL-inspecting proxy.")
+	}
+
+	fmt.Fprintf(out, "=== Connectivity Check ===\n")
+	fmt.Fprintf(out, "Source:     %s\n", source)
+	fmt.Fprintf(out, "Targets:    deriving from %d entries...\n", len(entries))
+	fmt.Fprintf(out, "Timeout:    %s   Concurrency: %d   Insecure TLS: %v\n\n",
 		opts.Timeout, opts.Concurrency, opts.InsecureSkipVerify)
 
-	ctx := context.Background()
+	// Wire signal-driven cancellation so Ctrl-C aborts in-flight probes
+	// instead of waiting for each per-probe timeout to elapse.
+	parent := cmd.Context()
+	if parent == nil {
+		parent = context.Background()
+	}
+	ctx, stop := signal.NotifyContext(parent, os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	results, summary := connchk.Run(ctx, entries, opts)
 
 	if len(results) == 0 {
-		fmt.Println("No dialable targets found (only CIDR ranges or unsubstituted <tenant> values).")
-		fmt.Println("Tip: pass --tenant <name> to substitute placeholders before probing.")
+		fmt.Fprintln(out, "No dialable targets found (only CIDR ranges or unsubstituted <tenant> values).")
+		fmt.Fprintln(out, "Tip: pass --tenant <name> to substitute placeholders before probing.")
 		return nil
 	}
 
-	renderResults(results)
-	renderSummary(summary)
+	renderResults(out, results)
+	renderSummary(out, summary, opts.InsecureSkipVerify)
 
 	if connchk.HasFailures(summary) {
-		os.Exit(1)
+		return ErrProbesFailed
 	}
 	return nil
 }
@@ -175,22 +210,25 @@ func filterByService(entries []types.NetworkEntry, service string) []types.Netwo
 	return out
 }
 
-// renderResults prints one block per (service, region) group with the per-target
-// DNS, TCP, and TLS findings. The style mirrors the ✓/✗/⚠ markers used by the
-// validate subcommand.
-func renderResults(results []connchk.ProbeResult) {
-	type groupKey struct{ svc, region, direction string }
+// renderResults prints one block per (direction, service, region) group with
+// the per-target DNS, TCP, and TLS findings. The style mirrors the ✓/✗/⚠
+// markers used by the validate subcommand.
+func renderResults(out io.Writer, results []connchk.ProbeResult) {
+	type groupKey struct{ direction, svc, region string }
 
 	grouped := make(map[groupKey][]connchk.ProbeResult)
 	order := make([]groupKey, 0)
 	for _, r := range results {
-		k := groupKey{r.Service, r.Region, r.Direction}
+		k := groupKey{r.Direction, r.Service, r.Region}
 		if _, ok := grouped[k]; !ok {
 			order = append(order, k)
 		}
 		grouped[k] = append(grouped[k], r)
 	}
 	sort.SliceStable(order, func(i, j int) bool {
+		if order[i].direction != order[j].direction {
+			return order[i].direction < order[j].direction
+		}
 		if order[i].svc != order[j].svc {
 			return order[i].svc < order[j].svc
 		}
@@ -198,32 +236,33 @@ func renderResults(results []connchk.ProbeResult) {
 	})
 
 	for _, k := range order {
-		fmt.Printf("[%s] %s / %s\n", k.direction, k.svc, k.region)
+		fmt.Fprintf(out, "[%s] %s / %s\n", k.direction, k.svc, k.region)
 		for _, r := range grouped[k] {
-			renderTarget(r)
+			renderTarget(out, r)
 		}
-		fmt.Println()
+		fmt.Fprintln(out)
 	}
 }
 
-func renderTarget(r connchk.ProbeResult) {
-	fmt.Printf("  %s\n", r.Target)
+func renderTarget(out io.Writer, r connchk.ProbeResult) {
+	fmt.Fprintf(out, "  %s\n", r.Target)
 
 	switch r.DNS.Status {
 	case connchk.StatusOK:
-		fmt.Printf("    ✓ DNS: %s   (%s)\n", strings.Join(r.DNS.Addresses, ", "), formatDuration(r.DNS.Duration))
+		fmt.Fprintf(out, "    ✓ DNS: %s   (%s)\n", strings.Join(r.DNS.Addresses, ", "), formatDuration(r.DNS.Duration))
 	case connchk.StatusFail:
-		fmt.Printf("    ✗ DNS: %s\n", r.DNS.Err)
+		fmt.Fprintf(out, "    ✗ DNS: %s\n", r.DNS.Err)
 	case connchk.StatusSkipped:
-		fmt.Printf("    – DNS: skipped (IP literal)\n")
+		addr := strings.Join(r.DNS.Addresses, ", ")
+		fmt.Fprintf(out, "    – DNS: %s (IP literal)\n", addr)
 	}
 
 	for _, tcp := range r.TCP {
 		switch tcp.Status {
 		case connchk.StatusOK:
-			fmt.Printf("    ✓ TCP %d reachable   (%s)\n", tcp.Port, formatDuration(tcp.Duration))
+			fmt.Fprintf(out, "    ✓ TCP %d reachable   (%s)\n", tcp.Port, formatDuration(tcp.Duration))
 		case connchk.StatusFail:
-			fmt.Printf("    ✗ TCP %d BLOCKED: %s\n", tcp.Port, tcp.Err)
+			fmt.Fprintf(out, "    ✗ TCP %d BLOCKED: %s\n", tcp.Port, tcp.Err)
 		}
 
 		if tcp.TLS == nil {
@@ -235,25 +274,28 @@ func renderTarget(r connchk.ProbeResult) {
 			if tcp.TLS.CertSubject != "" {
 				cert = fmt.Sprintf("   cert: %s (issuer: %s)", tcp.TLS.CertSubject, tcp.TLS.CertIssuer)
 			}
-			fmt.Printf("    ✓ TLS %d handshake OK   (%s)%s\n", tcp.Port, formatDuration(tcp.TLS.Duration), cert)
+			fmt.Fprintf(out, "    ✓ TLS %d handshake OK   (%s)%s\n", tcp.Port, formatDuration(tcp.TLS.Duration), cert)
 		case connchk.StatusFail:
-			fmt.Printf("    ✗ TLS %d FAILED: %s\n", tcp.Port, tcp.TLS.Err)
+			fmt.Fprintf(out, "    ✗ TLS %d FAILED: %s\n", tcp.Port, tcp.TLS.Err)
 		case connchk.StatusSkipped:
-			fmt.Printf("    ⚠ TLS %d: %s\n", tcp.Port, tcp.TLS.Err)
+			fmt.Fprintf(out, "    ⚠ TLS %d: %s\n", tcp.Port, tcp.TLS.Err)
 		}
 	}
 }
 
-func renderSummary(s connchk.Summary) {
-	fmt.Println("=== Summary ===")
-	fmt.Printf("  Targets probed:   %d\n", s.Targets)
-	fmt.Printf("  DNS:              %d ok, %d failed\n", s.DNSOK, s.DNSFail)
-	fmt.Printf("  TCP:              %d ok, %d failed\n", s.TCPOK, s.TCPFail)
-	fmt.Printf("  TLS handshakes:   %d ok, %d failed, %d skipped\n", s.TLSOK, s.TLSFail, s.TLSSkipped)
+func renderSummary(out io.Writer, s connchk.Summary, insecure bool) {
+	fmt.Fprintln(out, "=== Summary ===")
+	fmt.Fprintf(out, "  Targets probed:   %d\n", s.Targets)
+	fmt.Fprintf(out, "  DNS:              %d ok, %d failed\n", s.DNSOK, s.DNSFail)
+	fmt.Fprintf(out, "  TCP:              %d ok, %d failed\n", s.TCPOK, s.TCPFail)
+	fmt.Fprintf(out, "  TLS handshakes:   %d ok, %d failed, %d skipped\n", s.TLSOK, s.TLSFail, s.TLSSkipped)
+	if insecure {
+		fmt.Fprintln(out, "  Note: TLS certificate validation was disabled (--insecure).")
+	}
 	if connchk.HasFailures(s) {
-		fmt.Println("\nResult: ✗ one or more probes failed — see the report above for details.")
+		fmt.Fprintln(out, "\nResult: ✗ one or more probes failed — see the report above for details.")
 	} else {
-		fmt.Println("\nResult: ✓ all probes succeeded.")
+		fmt.Fprintln(out, "\nResult: ✓ all probes succeeded.")
 	}
 }
 

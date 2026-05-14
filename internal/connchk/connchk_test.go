@@ -2,7 +2,9 @@ package connchk
 
 import (
 	"context"
-	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"errors"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -56,7 +58,8 @@ func TestIsHostname(t *testing.T) {
 }
 
 // TestRunAgainstLocalListener spins up a plain TCP server (no TLS) and asserts
-// that the probe reports DNS skipped (IP), TCP ok, and TLS skipped (no SNI).
+// that the probe reports DNS skipped (IP), TCP ok, and no TLS attempt for a
+// non-TLS port.
 func TestRunAgainstLocalListener(t *testing.T) {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
@@ -94,9 +97,9 @@ func TestRunAgainstLocalListener(t *testing.T) {
 }
 
 // TestRunTLSAgainstHTTPSServer confirms that a TLS handshake is attempted on
-// port 443 (and equivalent TLS-typical ports). We use a real httptest TLS
-// server and inject its self-signed cert into the system pool via
-// InsecureSkipVerify so the handshake completes deterministically.
+// the configured TLS ports, and that the SAN-fallback subject is used when CN
+// is empty (httptest's self-signed cert has CN="example.com" so this also
+// exercises the typical CN path).
 func TestRunTLSAgainstHTTPSServer(t *testing.T) {
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -106,35 +109,25 @@ func TestRunTLSAgainstHTTPSServer(t *testing.T) {
 	host, portStr, _ := net.SplitHostPort(strings.TrimPrefix(server.URL, "https://"))
 	port, _ := strconv.Atoi(portStr)
 
-	// Force this port to be treated as a TLS port for the test. We do this by
-	// using one of the real TLS-typical ports indirectly: probe against an IP
-	// literal so we exercise the "skip TLS for IP" branch, then re-run with a
-	// hostname-like target loop back via 127.0.0.1 → localhost.
-	tlsPorts[port] = true
-	defer delete(tlsPorts, port)
-
-	entries := []types.NetworkEntry{{
-		Service: "https",
-		Region:  "local",
-		Values:  []string{host}, // IP literal — TLS should be skipped
-		Ports:   []int{port},
-	}, {
-		Service: "https",
-		Region:  "local",
-		Values:  []string{"localhost"}, // hostname — TLS should run
-		Ports:   []int{port},
-	}}
+	// Two entries: one targeting the IP (TLS handshake should be skipped —
+	// no SNI for IP literals), one targeting "localhost" so SNI matches the
+	// httptest cert and the handshake completes.
+	entries := []types.NetworkEntry{
+		{Service: "https", Region: "local", Values: []string{host}, Ports: []int{port}},
+		{Service: "https", Region: "local", Values: []string{"localhost"}, Ports: []int{port}},
+	}
 
 	results, _ := Run(context.Background(), entries, CheckOptions{
 		Timeout:            2 * time.Second,
 		InsecureSkipVerify: true,
+		TLSPorts:           []int{port},
 	})
 	require.Len(t, results, 2)
 
-	var ip, host2 ProbeResult
+	var ip, hostname ProbeResult
 	for _, r := range results {
 		if r.IsHostname {
-			host2 = r
+			hostname = r
 		} else {
 			ip = r
 		}
@@ -144,36 +137,81 @@ func TestRunTLSAgainstHTTPSServer(t *testing.T) {
 	require.NotNil(t, ip.TCP[0].TLS, "TLS probe should exist but be skipped for IP literal")
 	assert.Equal(t, StatusSkipped, ip.TCP[0].TLS.Status)
 
-	require.Len(t, host2.TCP, 1)
-	require.NotNil(t, host2.TCP[0].TLS)
-	assert.Equal(t, StatusOK, host2.TCP[0].TLS.Status)
+	require.Len(t, hostname.TCP, 1)
+	require.NotNil(t, hostname.TCP[0].TLS)
+	assert.Equal(t, StatusOK, hostname.TCP[0].TLS.Status)
+	assert.NotEmpty(t, hostname.TCP[0].TLS.CertSubject, "cert subject should be populated from CN or SAN")
 }
 
 func TestClassifyTLSErr(t *testing.T) {
 	tests := []struct {
-		name string
-		err  error
-		want string
+		name     string
+		err      error
+		contains string
 	}{
-		{"unknown CA", &certError{"x509: certificate signed by unknown authority"}, "certificate validation failed"},
-		{"timeout", &certError{"i/o timeout"}, "TLS handshake timed out"},
-		{"other", &certError{"connection reset by peer"}, "connection reset by peer"},
+		{
+			name:     "unknown CA",
+			err:      x509.UnknownAuthorityError{},
+			contains: "certificate signed by unknown authority (possible SSL inspection / proxy)",
+		},
+		{
+			name:     "hostname mismatch is not labelled as SSL inspection",
+			err:      x509.HostnameError{Host: "wrong.example.com"},
+			contains: "certificate hostname mismatch",
+		},
+		{
+			name:     "expired or otherwise invalid cert",
+			err:      x509.CertificateInvalidError{Reason: x509.Expired, Detail: "leaf expired"},
+			contains: "certificate invalid",
+		},
+		{
+			name:     "context deadline exceeded",
+			err:      context.DeadlineExceeded,
+			contains: "TLS handshake timed out",
+		},
+		{
+			name:     "i/o timeout net error",
+			err:      errors.New("read tcp 10.0.0.1:443: i/o timeout"),
+			contains: "TLS handshake timed out",
+		},
+		{
+			name:     "passthrough for unknown errors",
+			err:      errors.New("connection reset by peer"),
+			contains: "connection reset by peer",
+		},
 	}
+
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			got := classifyTLSErr(tc.err)
-			assert.Contains(t, got, tc.want)
+			assert.Contains(t, got, tc.contains)
 		})
 	}
 }
 
-type certError struct{ msg string }
+// TestClassifyTLSErrHostnameMismatchIsNotSSLInspection is a focused regression
+// guard for the bug surfaced in code review: the old string-based classifier
+// labelled "x509: certificate is valid for X, not Y" as SSL inspection. The
+// new errors.As-based path must call it a hostname mismatch.
+func TestClassifyTLSErrHostnameMismatchIsNotSSLInspection(t *testing.T) {
+	got := classifyTLSErr(x509.HostnameError{Host: "wrong.example.com"})
+	assert.NotContains(t, got, "SSL inspection")
+	assert.Contains(t, got, "hostname mismatch")
+}
 
-func (e *certError) Error() string { return e.msg }
+func TestCertSubjectFallsBackToSAN(t *testing.T) {
+	// CN populated → CN wins
+	cn := certSubject(&x509.Certificate{
+		Subject:  pkix.Name{CommonName: "api.example.com"},
+		DNSNames: []string{"san.example.com"},
+	})
+	assert.Equal(t, "api.example.com", cn)
 
-// TestTLSConfigUsesSNI is a regression guard: we ensure the TLS config built
-// during a handshake carries the hostname as ServerName.
-func TestTLSConfigUsesSNI(t *testing.T) {
-	cfg := &tls.Config{ServerName: "messaging01-eu.engine-pool.services.delinea.app"}
-	assert.Equal(t, "messaging01-eu.engine-pool.services.delinea.app", cfg.ServerName)
+	// CN empty → first SAN wins
+	san := certSubject(&x509.Certificate{DNSNames: []string{"san.example.com", "alt.example.com"}})
+	assert.Equal(t, "san.example.com", san)
+
+	// Neither → empty
+	empty := certSubject(&x509.Certificate{})
+	assert.Equal(t, "", empty)
 }

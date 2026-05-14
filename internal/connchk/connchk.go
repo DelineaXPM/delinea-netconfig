@@ -7,6 +7,7 @@ package connchk
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"net"
@@ -25,19 +26,22 @@ const DefaultTimeout = 5 * time.Second
 // DefaultConcurrency caps the number of probes running in parallel.
 const DefaultConcurrency = 10
 
-// tlsPorts is the set of ports for which a TLS handshake is attempted in
-// addition to the plain TCP dial. Other ports are assumed to be plaintext and
-// only get the TCP reachability check.
-var tlsPorts = map[int]bool{
-	443:   true, // HTTPS / WSS
-	5671:  true, // AMQPS
-	8883:  true, // MQTTS
-	636:   true, // LDAPS
-	993:   true, // IMAPS
-	995:   true, // POP3S
-	465:   true, // SMTPS
-	5986:  true, // WinRM HTTPS
-	8443:  true, // alternate HTTPS
+// defaultTLSPorts is the canonical set of ports for which a TLS handshake is
+// attempted in addition to the plain TCP dial. Callers can override this set
+// via CheckOptions.TLSPorts. Other ports are assumed to be plaintext and only
+// get the TCP reachability check.
+func defaultTLSPorts() []int {
+	return []int{
+		443,  // HTTPS / WSS
+		5671, // AMQPS
+		8883, // MQTTS
+		636,  // LDAPS
+		993,  // IMAPS
+		995,  // POP3S
+		465,  // SMTPS
+		5986, // WinRM HTTPS
+		8443, // alternate HTTPS
+	}
 }
 
 // ProbeStatus is the outcome of a single check step.
@@ -62,14 +66,20 @@ type CheckOptions struct {
 	// handshake. Useful when probing self-signed endpoints or when the user
 	// only wants to confirm that the handshake completes.
 	InsecureSkipVerify bool
+
+	// TLSPorts is the set of ports for which a TLS handshake is attempted
+	// after the TCP dial. Empty means defaultTLSPorts(). Exposed on the
+	// library API so tests can inject their own ports without mutating
+	// package-level state; not currently surfaced on the CLI.
+	TLSPorts []int
 }
 
 // ProbeResult captures the DNS + TCP + TLS outcome for a single target.
 //
 // A "target" is one hostname or IP literal. Each target gets at most one DNS
 // probe (IP literals get StatusSkipped) and one TCPProbe per port. Each TCP
-// probe may also carry a TLS sub-probe when the port is in tlsPorts and the
-// target is a hostname.
+// probe may also carry a TLS sub-probe when the port is in CheckOptions.TLSPorts
+// and the target is a hostname (or skipped with a reason when the target is an IP).
 type ProbeResult struct {
 	Service    string
 	Region     string
@@ -77,11 +87,12 @@ type ProbeResult struct {
 	Target     string // hostname or IP literal that was probed
 	IsHostname bool
 
-	DNS  DNSProbe
-	TCP  []TCPProbe
+	DNS DNSProbe
+	TCP []TCPProbe
 }
 
 // DNSProbe is the result of resolving a hostname to one or more IPs.
+// For IP literals the status is StatusSkipped and Addresses holds the literal.
 type DNSProbe struct {
 	Status    ProbeStatus
 	Addresses []string
@@ -101,7 +112,9 @@ type TCPProbe struct {
 }
 
 // TLSProbe is the result of a TLS handshake. CertSubject and CertIssuer come
-// from the leaf certificate when the handshake succeeded.
+// from the leaf certificate when the handshake succeeded. CertSubject falls
+// back to the first SAN DNS name when the leaf has an empty CommonName, which
+// is common for modern (Azure, Let's Encrypt) certificates.
 type TLSProbe struct {
 	Status      ProbeStatus
 	Err         string
@@ -124,11 +137,15 @@ type Summary struct {
 
 // Run performs DNS, TCP, and TLS probes against every dialable value in the
 // supplied entries and returns one ProbeResult per (service, region, target)
-// tuple. Results are sorted deterministically (service, region, target).
+// tuple. Results are sorted deterministically (direction, service, region, target).
 //
 // CIDR ranges are skipped: they describe an allow-list of source IPs, not a
 // single dialable endpoint. Values that still contain a <tenant> placeholder
 // are also skipped — the caller is responsible for substitution.
+//
+// The supplied context is propagated to every DNS lookup, TCP dial, and TLS
+// handshake, so callers can wire it to signal.NotifyContext for clean Ctrl-C
+// behaviour.
 func Run(ctx context.Context, entries []types.NetworkEntry, opts CheckOptions) ([]ProbeResult, Summary) {
 	if opts.Timeout <= 0 {
 		opts.Timeout = DefaultTimeout
@@ -136,6 +153,10 @@ func Run(ctx context.Context, entries []types.NetworkEntry, opts CheckOptions) (
 	if opts.Concurrency <= 0 {
 		opts.Concurrency = DefaultConcurrency
 	}
+	if len(opts.TLSPorts) == 0 {
+		opts.TLSPorts = defaultTLSPorts()
+	}
+	tlsSet := portSet(opts.TLSPorts)
 
 	jobs := buildJobs(entries)
 
@@ -150,12 +171,15 @@ func Run(ctx context.Context, entries []types.NetworkEntry, opts CheckOptions) (
 		go func() {
 			defer wg.Done()
 			defer func() { <-sem }()
-			results[i] = probeOne(ctx, jobs[i], opts)
+			results[i] = probeOne(ctx, jobs[i], opts, tlsSet)
 		}()
 	}
 	wg.Wait()
 
 	sort.SliceStable(results, func(i, j int) bool {
+		if results[i].Direction != results[j].Direction {
+			return results[i].Direction < results[j].Direction
+		}
 		if results[i].Service != results[j].Service {
 			return results[i].Service < results[j].Service
 		}
@@ -166,6 +190,14 @@ func Run(ctx context.Context, entries []types.NetworkEntry, opts CheckOptions) (
 	})
 
 	return results, summarize(results)
+}
+
+func portSet(ports []int) map[int]bool {
+	set := make(map[int]bool, len(ports))
+	for _, p := range ports {
+		set[p] = true
+	}
+	return set
 }
 
 // job describes one (target, ports) probe to perform. Ports are deduplicated
@@ -231,7 +263,7 @@ func mergePort(ports []int, p int) []int {
 	return append(ports, p)
 }
 
-func probeOne(ctx context.Context, j job, opts CheckOptions) ProbeResult {
+func probeOne(ctx context.Context, j job, opts CheckOptions, tlsSet map[int]bool) ProbeResult {
 	result := ProbeResult{
 		Service:    j.service,
 		Region:     j.region,
@@ -243,7 +275,7 @@ func probeOne(ctx context.Context, j job, opts CheckOptions) ProbeResult {
 	result.DNS = probeDNS(ctx, j.target, j.isHost, opts.Timeout)
 
 	for _, port := range j.ports {
-		result.TCP = append(result.TCP, probePort(ctx, j.target, port, j.isHost, opts))
+		result.TCP = append(result.TCP, probePort(ctx, j.target, port, j.isHost, opts, tlsSet))
 	}
 
 	return result
@@ -258,8 +290,7 @@ func probeDNS(ctx context.Context, target string, isHost bool, timeout time.Dura
 	defer cancel()
 
 	start := time.Now()
-	resolver := net.DefaultResolver
-	addrs, err := resolver.LookupHost(dialCtx, target)
+	addrs, err := net.DefaultResolver.LookupHost(dialCtx, target)
 	elapsed := time.Since(start)
 	if err != nil {
 		return DNSProbe{Status: StatusFail, Err: err.Error(), Duration: elapsed}
@@ -267,7 +298,7 @@ func probeDNS(ctx context.Context, target string, isHost bool, timeout time.Dura
 	return DNSProbe{Status: StatusOK, Addresses: addrs, Duration: elapsed}
 }
 
-func probePort(ctx context.Context, target string, port int, isHost bool, opts CheckOptions) TCPProbe {
+func probePort(ctx context.Context, target string, port int, isHost bool, opts CheckOptions, tlsSet map[int]bool) TCPProbe {
 	address := net.JoinHostPort(target, strconv.Itoa(port))
 
 	dialCtx, cancel := context.WithTimeout(ctx, opts.Timeout)
@@ -285,27 +316,28 @@ func probePort(ctx context.Context, target string, port int, isHost bool, opts C
 
 	probe := TCPProbe{Port: port, Status: StatusOK, Duration: elapsed}
 
-	if tlsPorts[port] && isHost {
-		probe.TLS = handshakeTLS(conn, target, opts)
-	} else if tlsPorts[port] && !isHost {
-		probe.TLS = &TLSProbe{Status: StatusSkipped, Err: "TLS handshake skipped for IP target (no SNI)"}
+	if tlsSet[port] {
+		if isHost {
+			probe.TLS = handshakeTLS(ctx, conn, target, opts)
+		} else {
+			probe.TLS = &TLSProbe{Status: StatusSkipped, Err: "TLS handshake skipped for IP target (no SNI)"}
+		}
 	}
 	return probe
 }
 
-func handshakeTLS(conn net.Conn, host string, opts CheckOptions) *TLSProbe {
+func handshakeTLS(parent context.Context, conn net.Conn, host string, opts CheckOptions) *TLSProbe {
 	deadline := time.Now().Add(opts.Timeout)
 	_ = conn.SetDeadline(deadline)
 
-	cfg := &tls.Config{
-		ServerName:         host,
-		InsecureSkipVerify: opts.InsecureSkipVerify, // exposed via --insecure flag
-	}
-
-	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	ctx, cancel := context.WithDeadline(parent, deadline)
 	defer cancel()
 
-	tlsConn := tls.Client(conn, cfg)
+	tlsConn := tls.Client(conn, &tls.Config{
+		ServerName:         host,
+		InsecureSkipVerify: opts.InsecureSkipVerify, // gated by --insecure
+	})
+
 	start := time.Now()
 	err := tlsConn.HandshakeContext(ctx)
 	elapsed := time.Since(start)
@@ -315,23 +347,50 @@ func handshakeTLS(conn net.Conn, host string, opts CheckOptions) *TLSProbe {
 
 	probe := &TLSProbe{Status: StatusOK, Duration: elapsed}
 	if certs := tlsConn.ConnectionState().PeerCertificates; len(certs) > 0 {
-		probe.CertSubject = certs[0].Subject.CommonName
+		probe.CertSubject = certSubject(certs[0])
 		probe.CertIssuer = certs[0].Issuer.CommonName
 	}
-	_ = tlsConn.Close()
+	// tlsConn shares the underlying net.Conn with the caller; the caller's
+	// deferred conn.Close() will release the socket. Closing here too is a
+	// double-close on the same FD — harmless on POSIX but a smell.
 	return probe
 }
 
+// certSubject returns the leaf's CommonName, falling back to the first SAN DNS
+// name when CN is empty (Azure / Let's Encrypt-style certs). When neither is
+// present, returns an empty string so callers can omit the subject line.
+func certSubject(cert *x509.Certificate) string {
+	if cn := cert.Subject.CommonName; cn != "" {
+		return cn
+	}
+	if len(cert.DNSNames) > 0 {
+		return cert.DNSNames[0]
+	}
+	return ""
+}
+
+// classifyTLSErr maps a TLS handshake error to a human-friendly message,
+// preserving the distinction between SSL inspection (unknown CA) and
+// hostname mismatch (correct CA, wrong subject). Using errors.As against
+// typed x509 errors avoids the substring-match trap where any "x509: ..."
+// message gets flagged as proxy interception.
 func classifyTLSErr(err error) string {
-	msg := err.Error()
+	var (
+		unknownCA  x509.UnknownAuthorityError
+		hostnameMM x509.HostnameError
+		certBad    x509.CertificateInvalidError
+	)
 	switch {
-	case strings.Contains(msg, "certificate signed by unknown authority"),
-		strings.Contains(msg, "x509: certificate"):
-		return fmt.Sprintf("certificate validation failed: %s (possible SSL inspection / proxy)", msg)
-	case errors.Is(err, context.DeadlineExceeded), strings.Contains(msg, "i/o timeout"):
+	case errors.As(err, &unknownCA):
+		return fmt.Sprintf("certificate signed by unknown authority (possible SSL inspection / proxy): %s", err)
+	case errors.As(err, &hostnameMM):
+		return fmt.Sprintf("certificate hostname mismatch: %s", err)
+	case errors.As(err, &certBad):
+		return fmt.Sprintf("certificate invalid: %s", err)
+	case errors.Is(err, context.DeadlineExceeded), strings.Contains(err.Error(), "i/o timeout"):
 		return "TLS handshake timed out"
 	default:
-		return msg
+		return err.Error()
 	}
 }
 
@@ -349,9 +408,10 @@ func summarize(results []ProbeResult) Summary {
 			s.DNSFail++
 		}
 		for _, t := range r.TCP {
-			if t.Status == StatusOK {
+			switch t.Status {
+			case StatusOK:
 				s.TCPOK++
-			} else if t.Status == StatusFail {
+			case StatusFail:
 				s.TCPFail++
 			}
 			if t.TLS != nil {
