@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-05-14
+
 ### Added
 - `check` subcommand: probe DNS resolution, TCP reachability, and TLS handshake against the endpoints declared in network-requirements.json. Supports `--region`, `--service`, `--tenant`, `--timeout`, `--concurrency`, and `--insecure`. Exits non-zero on any failed probe so it can gate firewall-readiness scripts.
 
