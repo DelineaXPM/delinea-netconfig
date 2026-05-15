@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `info --updates`: changelog endpoint path updated from `/network-requirements-changelog` to `/network-requirements/changelog` to match server-side change
+
 ## [1.9.0] - 2026-05-14
 
 ### Added
